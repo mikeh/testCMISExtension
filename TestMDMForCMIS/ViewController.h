@@ -9,5 +9,10 @@
 #import <UIKit/UIKit.h>
 
 @interface ViewController : UIViewController
-
+@property (nonatomic, weak) IBOutlet UIButton * testCMISSessionButton;
+@property (nonatomic, weak) IBOutlet UIButton * uploadButton;
+@property (nonatomic, weak) IBOutlet UIButton * removeButton;
+- (IBAction)createCMISSession:(id)sender;
+- (IBAction)upload:(id)sender;
+- (IBAction)remove:(id)sender;
 @end

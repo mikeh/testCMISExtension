@@ -36,5 +36,7 @@
 		<string>UIInterfaceOrientationLandscapeLeft</string>
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
+	<key>GDLibraryMode</key>
+	<string>GDEnterpriseSimulation</string>
 </dict>
 </plist>
