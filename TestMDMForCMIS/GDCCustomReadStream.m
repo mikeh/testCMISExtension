@@ -115,5 +115,60 @@
     //do we need an extra run loop? Let's try without    
 }
 
+- (void)stream:(NSStream *)aStream handleEvent:(NSStreamEvent)eventCode {
+	
+	assert(aStream == self);
+	
+	switch (eventCode) {
+		case NSStreamEventOpenCompleted:
+			if (requestedEvents & kCFStreamEventOpenCompleted) {
+				copiedCallback((__bridge CFReadStreamRef)self,
+							   kCFStreamEventOpenCompleted,
+							   copiedContext.info);
+			}
+			break;
+			
+		case NSStreamEventHasBytesAvailable:
+			if (requestedEvents & kCFStreamEventHasBytesAvailable) {
+				copiedCallback((__bridge CFReadStreamRef)self,
+							   kCFStreamEventHasBytesAvailable,
+							   copiedContext.info);
+			}
+			break;
+			
+		case NSStreamEventErrorOccurred:
+			if (requestedEvents & kCFStreamEventErrorOccurred) {
+				copiedCallback((__bridge CFReadStreamRef)self,
+							   kCFStreamEventErrorOccurred,
+							   copiedContext.info);
+			}
+			break;
+			
+		case NSStreamEventEndEncountered:
+			if (requestedEvents & kCFStreamEventEndEncountered) {
+				copiedCallback((__bridge CFReadStreamRef)self,
+							   kCFStreamEventEndEncountered,
+							   copiedContext.info);
+			}
+			break;
+			
+		case NSStreamEventHasSpaceAvailable:
+			// This doesn't make sense for a read stream
+			break;
+			
+		default:
+			break;
+	}
+}
+
+- (void) notifyEvent:(CFStreamEventType) event
+{
+    if ( [_delegate respondsToSelector:@selector(stream:handleEvent:)] )
+        [_delegate stream:self handleEvent:event];
+    
+    if ( copiedCallback && ( event & requestedEvents ) )
+        copiedCallback((__bridge CFReadStreamRef) self, event, copiedContext.info);
+}
+
 
 @end

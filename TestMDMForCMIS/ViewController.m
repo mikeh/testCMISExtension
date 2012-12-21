@@ -8,6 +8,8 @@
 
 #import "ViewController.h"
 #import "CMISSession.h"
+#import "CMISDocument.h"
+#import "CMISFolder.h"
 #import "CMISSessionParameters.h"
 #import "TestCMISNetworkIO.h"
 #import <objc/runtime.h>
@@ -23,7 +25,7 @@
 @interface ViewController ()
 @property (nonatomic, strong) CMISSession * session;
 @property (nonatomic, strong) CMISFolder *rootFolder;
-- (void)testGDIO;
+@property (nonatomic, strong) NSString *testDocId;
 - (NSString *)prepareTestFileForUpload;
 @end
 
@@ -34,6 +36,7 @@
 @synthesize removeButton = _removeButton;
 @synthesize rootFolder = _rootFolder;
 @synthesize downloadButton = _downloadButton;
+@synthesize testDocId = _testDocId;
 - (void)viewDidLoad
 {
     NSLog(@"We are in viewDidLoad");
@@ -50,7 +53,6 @@
 
 - (IBAction)createCMISSession:(id)sender
 {
-//    [self testGDIO];
     NSLog(@"We are in createCMISSession");
     NSBundle *bundle = [NSBundle bundleForClass:[self class]];
     NSString *envsPListPath = [bundle pathForResource:@"env-cfg" ofType:@"plist"];
@@ -82,12 +84,15 @@
     
     [parameters setObject:paramExtensions forKey:kCMISSessionParameterCustomFileIO];
     
+    /** 
+     We cannot use GD HTTP request on simulators.
     const char * extensionName = class_getName([TestCMISNetworkIO class]);
     NSMutableDictionary *networkExtensions = [NSMutableDictionary dictionary];
     [networkExtensions setObject:[NSString stringWithUTF8String:extensionName] forKey:kCMISSessionParameterCustomRequest];
     
-    //    [parameters setObject:networkExtensions forKey:kCMISSessionParameterCustomNetworkIO];
-    
+    [parameters setObject:networkExtensions forKey:kCMISSessionParameterCustomNetworkIO];
+
+     */
     [CMISSession connectWithSessionParameters:parameters completionBlock:^(CMISSession *session, NSError *error){
         if (nil == session)
         {
@@ -143,10 +148,12 @@
                                             if (nil == objectID)
                                             {
                                                 NSLog(@"CMIS upload of test document failed. Error is %d with message %@", [error code], [error localizedDescription]);
+                                                self.testDocId = nil;
                                             }
                                             else
                                             {
                                                 NSLog(@"Upload succeeded and the object ID is %@", objectID);
+                                                self.testDocId = objectID;
                                             }
                                         } progressBlock:^(unsigned long long bytesUploaded, unsigned long long bytesTotal){}];
         }
@@ -158,6 +165,47 @@
 
 - (IBAction)remove:(id)sender
 {
+    if (self.session && self.testDocId)
+    {
+        [self.session retrieveObject:self.testDocId completionBlock:^(CMISObject *object, NSError *error){
+            if (object)
+            {
+                CMISDocument *doc = (CMISDocument *)object;
+                [doc deleteAllVersionsWithCompletionBlock:^(BOOL documentDeleted, NSError *deleteError){
+                    if (documentDeleted)
+                    {
+                        UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Success"
+                                                                        message:@"The test doc was deleted successfully"
+                                                                       delegate:self
+                                                              cancelButtonTitle:@"Ok"
+                                                              otherButtonTitles: nil];
+                        [alert show];
+                    }
+                    else
+                    {
+                        UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Error"
+                                                                        message:@"Failure to delete the test doc"
+                                                                       delegate:self
+                                                              cancelButtonTitle:@"Ok"
+                                                              otherButtonTitles: nil];
+                        [alert show];
+                        NSLog(@"Error deleting the test doc code=%d , message=%@",[deleteError code], [deleteError localizedDescription]);
+                    }
+                }];
+            }
+            else
+            {
+                UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Error"
+                                                                message:@"Failure to retrieve the test doc"
+                                                               delegate:self
+                                                      cancelButtonTitle:@"Ok"
+                                                      otherButtonTitles: nil];
+                [alert show];
+                NSLog(@"Error deleting the test doc code=%d , message=%@",[error code], [error localizedDescription]);
+                
+            }
+        }];
+    }
     
 }
 
@@ -192,15 +240,7 @@
 }
 
 
-- (void)testGDIO
-{
-    GDCWriteStream *writeStream = [GDCWriteStream outputStreamToFileAtPath:@"test_file_2.txt" append:NO];
-    if (writeStream)
-    {
-        NSLog(@"Creating the outputstream based on category was successful");
-    }
-    [writeStream close];
-}
+#pragma private methods
 
 - (NSString *)prepareTestFileForUpload
 {
