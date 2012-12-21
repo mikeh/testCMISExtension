@@ -30,6 +30,7 @@
 		4E0077581681BA9800908DE9 /* libObjectiveCMIS.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 4E0077571681BA9800908DE9 /* libObjectiveCMIS.a */; };
 		4E00775E1681BD1700908DE9 /* TestCMISNetworkIO.m in Sources */ = {isa = PBXBuildFile; fileRef = 4E00775D1681BD1700908DE9 /* TestCMISNetworkIO.m */; };
 		4E0077681682239500908DE9 /* env-cfg.plist in Resources */ = {isa = PBXBuildFile; fileRef = 4E0077671682239500908DE9 /* env-cfg.plist */; };
+		4E0E13751684703D00AF36AB /* GDCCustomReadStream.m in Sources */ = {isa = PBXBuildFile; fileRef = 4E0E13741684703D00AF36AB /* GDCCustomReadStream.m */; };
 		4E96A57316831EF5001AABEB /* TestFileManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 4E96A57216831EF5001AABEB /* TestFileManager.m */; };
 		4E96A57F16835319001AABEB /* GDCWriteStream+OutputStream.m in Sources */ = {isa = PBXBuildFile; fileRef = 4E96A57E16835318001AABEB /* GDCWriteStream+OutputStream.m */; };
 		4E96A5821683535C001AABEB /* GDCReadStream+InputStream.m in Sources */ = {isa = PBXBuildFile; fileRef = 4E96A5811683535C001AABEB /* GDCReadStream+InputStream.m */; };
@@ -153,6 +154,8 @@
 		4E00775C1681BD1700908DE9 /* TestCMISNetworkIO.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TestCMISNetworkIO.h; sourceTree = "<group>"; };
 		4E00775D1681BD1700908DE9 /* TestCMISNetworkIO.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TestCMISNetworkIO.m; sourceTree = "<group>"; };
 		4E0077671682239500908DE9 /* env-cfg.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "env-cfg.plist"; sourceTree = "<group>"; };
+		4E0E13731684703D00AF36AB /* GDCCustomReadStream.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GDCCustomReadStream.h; sourceTree = "<group>"; };
+		4E0E13741684703D00AF36AB /* GDCCustomReadStream.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GDCCustomReadStream.m; sourceTree = "<group>"; };
 		4E96A56E16831AEB001AABEB /* test_file.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = test_file.txt; sourceTree = "<group>"; };
 		4E96A57116831EF5001AABEB /* TestFileManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TestFileManager.h; sourceTree = "<group>"; };
 		4E96A57216831EF5001AABEB /* TestFileManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TestFileManager.m; sourceTree = "<group>"; };
@@ -241,6 +244,8 @@
 				4E96A5811683535C001AABEB /* GDCReadStream+InputStream.m */,
 				4E96A583168354E0001AABEB /* TestBaseEncoder.h */,
 				4E96A584168354E0001AABEB /* TestBaseEncoder.m */,
+				4E0E13731684703D00AF36AB /* GDCCustomReadStream.h */,
+				4E0E13741684703D00AF36AB /* GDCCustomReadStream.m */,
 			);
 			path = TestMDMForCMIS;
 			sourceTree = "<group>";
@@ -442,6 +447,7 @@
 				4E96A57F16835319001AABEB /* GDCWriteStream+OutputStream.m in Sources */,
 				4E96A5821683535C001AABEB /* GDCReadStream+InputStream.m in Sources */,
 				4E96A585168354E1001AABEB /* TestBaseEncoder.m in Sources */,
+				4E0E13751684703D00AF36AB /* GDCCustomReadStream.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

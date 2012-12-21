@@ -78,10 +78,16 @@ static NSString * kTMPDIRNAME = @"/tmp";
 
 + (BOOL)createFileAtPath:(NSString *)filePath contents:(NSData *)data error:(NSError **)error
 {
+    NSString *dataToBeWritten = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
+    NSLog(@"Trying to set up the file at location %@ with content %@", filePath, dataToBeWritten);
     BOOL isOk = [GDFileSystem writeToFile:data name:filePath error:error];
     if (!isOk)
     {
         NSLog(@"error creating file %@ with content. Error code is %d and message is %@", filePath, [*error code], [*error localizedDescription]);
+    }
+    else
+    {
+        NSLog(@"We created a a new file");
     }
     return isOk;
 }
@@ -115,7 +121,7 @@ static NSString * kTMPDIRNAME = @"/tmp";
 {
     BOOL isDir;
     BOOL tmpExists = [GDFileSystem fileExistsAtPath:kTMPDIRNAME isDirectory:&isDir];
-    if (tmpExists && isDir)
+    if (!tmpExists || !isDir)
     {
         NSError *error = nil;
         BOOL success = [GDFileSystem createDirectoryAtPath:kTMPDIRNAME withIntermediateDirectories:NO attributes:nil error:&error];
@@ -123,6 +129,10 @@ static NSString * kTMPDIRNAME = @"/tmp";
         {
             NSLog(@"Couldn't create the temporary directory. The error code is %d and error message is %@",[error code], [error localizedDescription]);
             return nil;
+        }
+        else
+        {
+            NSLog(@"succeeded in creating tmp directory");
         }
     }
     return kTMPDIRNAME;

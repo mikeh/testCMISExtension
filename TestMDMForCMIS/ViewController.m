@@ -11,7 +11,8 @@
 #import "CMISSessionParameters.h"
 #import "TestCMISNetworkIO.h"
 #import <objc/runtime.h>
-#import "GDCReadStream+InputStream.h"
+//#import "GDCReadStream+InputStream.h"
+#import "GDCCustomReadStream.h"
 #import "GDCWriteStream+OutputStream.h"
 #import "TestFileManager.h"
 #import "TestBaseEncoder.h"
@@ -23,6 +24,7 @@
 @property (nonatomic, strong) CMISSession * session;
 @property (nonatomic, strong) CMISFolder *rootFolder;
 - (void)testGDIO;
+- (NSString *)prepareTestFileForUpload;
 @end
 
 @implementation ViewController
@@ -31,6 +33,7 @@
 @synthesize uploadButton = _uploadButton;
 @synthesize removeButton = _removeButton;
 @synthesize rootFolder = _rootFolder;
+@synthesize downloadButton = _downloadButton;
 - (void)viewDidLoad
 {
     NSLog(@"We are in viewDidLoad");
@@ -40,6 +43,8 @@
     self.uploadButton.titleLabel.textColor = [UIColor lightGrayColor];
     self.removeButton.enabled = NO;
     self.removeButton.titleLabel.textColor = [UIColor lightGrayColor];
+    self.downloadButton.enabled = NO;
+    self.downloadButton.titleLabel.textColor = [UIColor lightGrayColor];
 }
 
 
@@ -68,7 +73,7 @@
     const char * fileManagerName = class_getName([TestFileManager class]);
     const char * baseEncoderName = class_getName([TestBaseEncoder class]);
     const char * outputName = class_getName([GDCWriteStream class]);
-    const char * inputName = class_getName([GDCReadStream class]);
+    const char * inputName = class_getName([GDCCustomReadStream class]);
 
     [paramExtensions setObject:[NSString stringWithUTF8String:fileManagerName] forKey:kCMISSessionParameterCustomFileManager];
     [paramExtensions setObject:[NSString stringWithUTF8String:baseEncoderName] forKey:kCMISSessionParameterCustomBaseEncoder];
@@ -100,6 +105,8 @@
             self.session = session;
             self.uploadButton.enabled = YES;
             self.uploadButton.titleLabel.textColor = [UIColor blueColor];
+            self.downloadButton.enabled = YES;
+            self.downloadButton.titleLabel.textColor = [UIColor blueColor];
             [self.session retrieveRootFolderWithCompletionBlock:^(CMISFolder *rootFolder, NSError *foldererror){
                 if (nil == rootFolder)
                 {
@@ -117,40 +124,20 @@
 
 - (IBAction)upload:(id)sender
 {
-    NSString *filePath = [[NSBundle bundleForClass:[self class]] pathForResource:@"test_file.txt" ofType:nil];
-    NSLog(@"The upload method is trying to locate a file at %@", filePath);
-    BOOL isDir;
-    BOOL fileExists = [GDFileSystem fileExistsAtPath:filePath isDirectory:&isDir];
-    if (!fileExists)
+//    NSString *filePath = [[NSBundle bundleForClass:[self class]] pathForResource:@"chemistry_tm_logo_small.png" ofType:nil];
+    NSString *filePath = [self prepareTestFileForUpload];
+    if (filePath)
     {
-        NSError *error = nil;
-        BOOL success = [GDFileSystem moveFileToSecureContainer:filePath error:&error];
-        if (!success)
-        {
-            UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Error"
-                                                            message:@"Couldn't move file to secure container"
-                                                           delegate:self
-                                                  cancelButtonTitle:@"Ok"
-                                                  otherButtonTitles: nil];
-            [alert show];
-        }
-        else
-        {
-            fileExists = YES;
-        }
-    }
-    if (fileExists)
-    {
-        NSDateFormatter *formatter = [[NSDateFormatter alloc] init];
-        [formatter setDateFormat: @"yyyy-MM-dd'T'HH-mm-ss-Z'"];
-        NSString *documentName = [NSString stringWithFormat:@"test_file_%@.txt", [formatter stringFromDate:[NSDate date]]];
+        NSURL *fileURL = [NSURL URLWithString:filePath];
+        NSString *documentName = [fileURL lastPathComponent];
+        NSLog(@"trying to upload file %@",documentName);
         NSMutableDictionary *documentProperties = [NSMutableDictionary dictionary];
         [documentProperties setObject:documentName forKey:kCMISPropertyName];
         [documentProperties setObject:kCMISPropertyObjectTypeIdValueDocument forKey:kCMISPropertyObjectTypeId];
         if (self.rootFolder)
         {
             [self.rootFolder createDocumentFromFilePath:filePath
-                                           withMimeType:@"text/plain"
+                                           withMimeType:@"test/plain"
                                          withProperties:documentProperties
                                         completionBlock:^(NSString *objectID, NSError * error){
                                             if (nil == objectID)
@@ -174,6 +161,37 @@
     
 }
 
+- (IBAction)download:(id)sender
+{
+    if (self.session)
+    {
+        [self.session retrieveObjectByPath:@"/ios-test/versioned-quote.txt" completionBlock:^(CMISObject *object, NSError *error){
+            if (nil == object)
+            {
+                UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Error"
+                                                                message:@"Couldn't download test file"
+                                                               delegate:self
+                                                      cancelButtonTitle:@"Ok"
+                                                      otherButtonTitles: nil];
+                [alert show];
+                NSLog(@"An error occurred when downloading the test file. Error code is %d and message is %@", [error code], [error localizedDescription]);
+                
+            }
+            else
+            {
+                UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Success"
+                                                                message:@"we downloaded the file versioned-quote.txt"
+                                                               delegate:self
+                                                      cancelButtonTitle:@"Ok"
+                                                      otherButtonTitles: nil];
+                [alert show];
+            }
+            
+        }];
+    }
+}
+
+
 - (void)testGDIO
 {
     GDCWriteStream *writeStream = [GDCWriteStream outputStreamToFileAtPath:@"test_file_2.txt" append:NO];
@@ -181,7 +199,51 @@
     {
         NSLog(@"Creating the outputstream based on category was successful");
     }
+    [writeStream close];
 }
+
+- (NSString *)prepareTestFileForUpload
+{
+    NSString *filePath = [[NSBundle bundleForClass:[self class]] pathForResource:@"test_file.txt" ofType:nil];
+    NSFileHandle *fileHandle = [NSFileHandle fileHandleForUpdatingAtPath:filePath];
+    NSData *content = [fileHandle readDataToEndOfFile];
+    
+    NSDateFormatter *formatter = [[NSDateFormatter alloc] init];
+    [formatter setDateFormat: @"yyyy-MM-dd'T'HH-mm-ss-Z'"];
+    NSString *documentName = [NSString stringWithFormat:@"test_file_%@.txt", [formatter stringFromDate:[NSDate date]]];
+    
+    if (content && 0 < [content length])
+    {
+        NSError *error = nil;
+        GDCWriteStream *writeStream = [GDFileSystem getWriteStream:documentName appendmode:NO error:&error];
+        if (writeStream)
+        {
+            if ([writeStream hasSpaceAvailable])
+            {
+                NSUInteger bufferSize = [content length];
+                uint8_t buffer[bufferSize];
+                [content getBytes:buffer length:bufferSize];
+                if ([writeStream write:(const uint8_t *)(&buffer) maxLength:bufferSize] != -1 )
+                {
+                    NSLog(@"Managed to write content of file into secure container");
+                }
+                else
+                {
+                    NSLog(@"failed to write data into secure container");
+                }
+            }
+            [writeStream close];
+        }
+    }
+    else
+    {
+        NSLog(@"We were not able to create a valid GDCWriteStream instance for file %@", documentName);
+    }
+    
+    [fileHandle closeFile];
+    return documentName;
+}
+
 
 
 @end
