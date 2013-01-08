@@ -11,5 +11,5 @@
 #import "CMISHttpRequestDelegate.h"
 
 @interface TestCMISNetworkIO : NSObject <CMISHttpRequestDelegate, GDHttpRequestDelegate>
-@property (nonatomic, strong) GDHttpRequest * request;
+@property (nonatomic, strong) GDHttpRequest * httpRequest;
 @end

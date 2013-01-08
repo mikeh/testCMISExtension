@@ -15,6 +15,7 @@
 	CFStreamClientContext copiedContext;
 	CFOptionFlags requestedEvents;
 }
+@property (nonatomic, strong) GDCReadStream * parentStream;
 @property (nonatomic, assign) NSStreamStatus streamStatus;
 @property (nonatomic, weak) id<NSStreamDelegate> delegate;
 - (id)initWithFile:(NSString *)filePathName;

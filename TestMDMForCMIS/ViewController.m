@@ -86,13 +86,13 @@
     
     /** 
      We cannot use GD HTTP request on simulators.
+     */
     const char * extensionName = class_getName([TestCMISNetworkIO class]);
     NSMutableDictionary *networkExtensions = [NSMutableDictionary dictionary];
     [networkExtensions setObject:[NSString stringWithUTF8String:extensionName] forKey:kCMISSessionParameterCustomRequest];
     
     [parameters setObject:networkExtensions forKey:kCMISSessionParameterCustomNetworkIO];
 
-     */
     [CMISSession connectWithSessionParameters:parameters completionBlock:^(CMISSession *session, NSError *error){
         if (nil == session)
         {

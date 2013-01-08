@@ -11,6 +11,8 @@
 #import "CMISHttpUploadRequest.h"
 #import "CMISErrors.h"
 #import "CMISBindingSession.h"
+#import "GDCWriteStream+OutputStream.h"
+#import "GDCCustomReadStream.h"
 #import <GD/GDFileSystem.h>
 
 typedef enum {
@@ -21,7 +23,7 @@ typedef enum {
 
 @interface TestCMISNetworkIO ()
 @property NSInteger requestType;
-@property (nonatomic, strong) GDCReadStream * inputStream;
+@property (nonatomic, strong) GDCCustomReadStream * inputStream;
 @property (nonatomic, strong) GDCWriteStream * outputStream;
 @property (nonatomic, strong) NSData *requestBody;
 @property (nonatomic, strong) NSMutableData *receivedData;
@@ -35,7 +37,7 @@ typedef enum {
 @end
 
 @implementation TestCMISNetworkIO
-@synthesize request = _request;
+@synthesize httpRequest = _httpRequest;
 @synthesize completionBlock = _completionBlock;
 @synthesize requestBody = _requestBody;
 @synthesize requestMethod = _requestMethod;
@@ -47,40 +49,42 @@ typedef enum {
 @synthesize requestType = _requestType;
 @synthesize receivedData = _receivedData;
 @synthesize authenticationHeader = _authenticationHeader;
+
 - (id)init
 {
     self = [super init];
     if (nil != self)
     {
-        _request = [[GDHttpRequest alloc] init];
-        _request.delegate = self;
+        self.httpRequest = [[GDHttpRequest alloc] init];
+        self.httpRequest.delegate = self;
     }
     return self;
 }
 
-- (void)onStatusChange:(id)httpRequest
+- (void)onStatusChange:(GDHttpRequest *)currentHttpRequest
 {
-    GDHttpRequest_state_t requestState = [self.request getState];
+    GDHttpRequest_state_t requestState = [currentHttpRequest getState];
     switch (requestState)
     {
         case GDHttpRequest_OPENED:
         {
+            NSLog(@"GDHttpRequest_OPENED");
             [self.authenticationHeader enumerateKeysAndObjectsUsingBlock:^(NSString *key, NSString *value, BOOL *stop){
-                [self.request setRequestHeader:[key UTF8String] withValue:[value UTF8String]];
+                [currentHttpRequest setRequestHeader:[key UTF8String] withValue:[value UTF8String]];
             }];
             if (self.headers)
             {
                 if ([self.requestMethod isEqualToString:@"POST"])
                 {
                     [self.headers enumerateKeysAndObjectsUsingBlock:^(NSString *key, NSString *value, BOOL *stop){
-                        [self.request setPostValue:[key UTF8String] forKey:[value UTF8String]];
+                        [currentHttpRequest setPostValue:[key UTF8String] forKey:[value UTF8String]];
                     }];
                     
                 }
                 else
                 {
                     [self.headers enumerateKeysAndObjectsUsingBlock:^(NSString *key, NSString *value, BOOL *stop){
-                        [self.request setRequestHeader:[key UTF8String] withValue:[value UTF8String]];
+                        [currentHttpRequest setRequestHeader:[key UTF8String] withValue:[value UTF8String]];
                     }];
                     
                 }
@@ -91,34 +95,30 @@ typedef enum {
                 NSUInteger length = [self.requestBody length];
                 char * data[length];
                 [self.requestBody getBytes:&data length:length];
-                [self.request send:(const char*)data withLength:length withTimeout:60];
-            }
-            else if (self.inputStream)
-            {
-                
+                [currentHttpRequest send:(const char*)data withLength:length withTimeout:60];
             }
             else
             {
-                [self.request send];
+                [currentHttpRequest send];
             }
+            NSLog(@"GDHttpRequest_OPENED - after sending request");
+            
             break;
         }
         case GDHttpRequest_LOADING:
         {
+            NSLog(@"GDHttpRequest_LOADING");
             BOOL isForStreamWriting = NO;
-            GDDirectByteBuffer * buffer = [self.request getReceiveBuffer];
+            GDDirectByteBuffer * buffer = [currentHttpRequest getReceiveBuffer];
             NSData *bufferData = [buffer unreadData];
             
             if (self.outputStream)
             {
-                if (self.outputStream.streamStatus == NSStreamStatusOpen)
-                {
-                    isForStreamWriting = YES;
-                    NSUInteger bufferLength = [bufferData length];
-                    uint8_t uBuffer[bufferLength];                    
-                    [bufferData getBytes:&uBuffer length:bufferLength];
-                    [self.outputStream write:(const uint8_t *)(&uBuffer) maxLength:bufferLength];
-                }
+                isForStreamWriting = YES;
+                NSUInteger bufferLength = [bufferData length];
+                uint8_t uBuffer[bufferLength];
+                [bufferData getBytes:&uBuffer length:bufferLength];
+                [self.outputStream write:(const uint8_t *)(&uBuffer) maxLength:bufferLength];
             }
             if (!isForStreamWriting)
             {
@@ -128,22 +128,16 @@ typedef enum {
         }
         case GDHttpRequest_HEADERS_RECEIVED:
         {
-            const char * headers = [self.request getAllResponseHeaders];
+            NSLog(@"GDHttpRequest_HEADERS_RECEIVED");
+            const char * headers = [currentHttpRequest getAllResponseHeaders];
             self.receivedData = [NSMutableData data];
-            if (nil != self.outputStream)
-            {
-                BOOL isStreamReady = self.outputStream.streamStatus == NSStreamStatusOpen;
-                if (!isStreamReady)
-                {
-                    [self.outputStream open];
-                }
-            }
             break;
         }
         case GDHttpRequest_DONE:
         {
-            int statusCode = [self.request getStatus];
-            const char * msgChar = [self.request getStatusText];
+            NSLog(@"GDHttpRequest_DONE");
+            int statusCode = [currentHttpRequest getStatus];
+            const char * msgChar = [currentHttpRequest getStatusText];
             NSString * message = [[NSString alloc] initWithUTF8String:msgChar];
             if (200 > statusCode || 299 < statusCode)
             {
@@ -153,20 +147,17 @@ typedef enum {
             }
             else
             {
-                GDDirectByteBuffer * buffer = [self.request getReceiveBuffer];
+                GDDirectByteBuffer * buffer = [self.httpRequest getReceiveBuffer];
                 NSData *bufferData = [buffer unreadData];
                 
                 BOOL isForStreamWriting = NO;
                 if (self.outputStream)
                 {
-                    if (self.outputStream.streamStatus == NSStreamStatusOpen)
-                    {
-                        isForStreamWriting = YES;
-                        NSUInteger bufferLength = [bufferData length];
-                        uint8_t uBuffer[bufferLength];
-                        [bufferData getBytes:&uBuffer length:bufferLength];
-                        [self.outputStream write:(const uint8_t *)(&uBuffer) maxLength:bufferLength];
-                    }
+                    isForStreamWriting = YES;
+                    NSUInteger bufferLength = [bufferData length];
+                    uint8_t uBuffer[bufferLength];
+                    [bufferData getBytes:&uBuffer length:bufferLength];
+                    [self.outputStream write:(const uint8_t *)(&uBuffer) maxLength:bufferLength];
                 }
                 if (!isForStreamWriting)
                 {
@@ -176,7 +167,6 @@ typedef enum {
                 CMISHttpResponse * httpResponse = [CMISHttpResponse responseWithStatusCode:statusCode statusMessage:message headers:nil responseData:self.receivedData];
                 self.completionBlock(httpResponse, nil);
             }
-            [self.request close];
             self.completionBlock = nil;
             break;
         }
@@ -210,12 +200,7 @@ typedef enum {
 
 - (void)cancel
 {
-    if (self.request)
-    {
-        [self.request abort];
-        [self.request close];
-        self.completionBlock = nil;
-    }
+    self.completionBlock = nil;
 }
 
 + (id<CMISHttpRequestDelegate>)startRequestWithURL:(NSURL *)url
@@ -233,8 +218,19 @@ typedef enum {
     networkIO.authenticationHeader = [NSDictionary dictionaryWithDictionary:authenticationProvider.httpHeadersToApply];
     networkIO.headers = additionalHeaders;
     networkIO.requestType = General;
-    [networkIO.request open:[networkIO.requestMethod UTF8String] withUrl:[[url absoluteString] UTF8String] withAsync:YES];
-    
+    BOOL success = [networkIO.httpRequest open:[networkIO.requestMethod UTF8String] withUrl:[[url absoluteString] UTF8String] withAsync:NO];
+    if (success)
+    {
+        NSLog(@"the request was successfully opened");
+        [networkIO.authenticationHeader enumerateKeysAndObjectsUsingBlock:^(NSString *key, NSString *value, BOOL *stop){
+            [networkIO.httpRequest setRequestHeader:[key UTF8String] withValue:[value UTF8String]];
+        }];
+        [networkIO.httpRequest send];
+    }
+    else
+    {
+        NSLog(@"opening the request failed");
+    }
     return networkIO;
 }
 
@@ -257,7 +253,7 @@ typedef enum {
     networkIO.authenticationHeader = [NSDictionary dictionaryWithDictionary:authenticationProvider.httpHeadersToApply];
     networkIO.headers = additionalHeaders;
     networkIO.requestType = Upload;
-    [networkIO.request open:[networkIO.requestMethod UTF8String] withUrl:[[url absoluteString] UTF8String] withAsync:YES];
+    [networkIO.httpRequest open:[networkIO.requestMethod UTF8String] withUrl:[[url absoluteString] UTF8String] withAsync:YES];
     
     return networkIO;
     
@@ -280,7 +276,7 @@ typedef enum {
     networkIO.outputStream = outputStream;
     id <CMISAuthenticationProvider> authenticationProvider = session.authenticationProvider;
     networkIO.authenticationHeader = [NSDictionary dictionaryWithDictionary:authenticationProvider.httpHeadersToApply];    
-    [networkIO.request open:[networkIO.requestMethod UTF8String] withUrl:[[url absoluteString] UTF8String] withAsync:YES];
+    [networkIO.httpRequest open:[networkIO.requestMethod UTF8String] withUrl:[[url absoluteString] UTF8String] withAsync:YES];
     
     return networkIO;    
 }
