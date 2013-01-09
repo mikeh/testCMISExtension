@@ -25,12 +25,13 @@
 		4E0076EE1681B9E800908DE9 /* Default-568h@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 4E0076ED1681B9E800908DE9 /* Default-568h@2x.png */; };
 		4E0076F11681B9E800908DE9 /* MainStoryboard.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 4E0076EF1681B9E800908DE9 /* MainStoryboard.storyboard */; };
 		4E0076F41681B9E800908DE9 /* GDAssets.bundle in Resources */ = {isa = PBXBuildFile; fileRef = 4E0076F31681B9E800908DE9 /* GDAssets.bundle */; };
-		4E0076F71681B9E800908DE9 /* ViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 4E0076F61681B9E800908DE9 /* ViewController.m */; };
 		4E0076FE1681BA0000908DE9 /* chemistry_tm_logo_small.png in Resources */ = {isa = PBXBuildFile; fileRef = 4E0076FD1681BA0000908DE9 /* chemistry_tm_logo_small.png */; };
 		4E0077581681BA9800908DE9 /* libObjectiveCMIS.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 4E0077571681BA9800908DE9 /* libObjectiveCMIS.a */; };
-		4E00775E1681BD1700908DE9 /* TestCMISNetworkIO.m in Sources */ = {isa = PBXBuildFile; fileRef = 4E00775D1681BD1700908DE9 /* TestCMISNetworkIO.m */; };
 		4E0077681682239500908DE9 /* env-cfg.plist in Resources */ = {isa = PBXBuildFile; fileRef = 4E0077671682239500908DE9 /* env-cfg.plist */; };
 		4E0E13751684703D00AF36AB /* GDCCustomReadStream.m in Sources */ = {isa = PBXBuildFile; fileRef = 4E0E13741684703D00AF36AB /* GDCCustomReadStream.m */; };
+		4E38805E169D84AA004BB186 /* SampleTableViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 4E38805D169D84AA004BB186 /* SampleTableViewController.m */; };
+		4E38806B169DD064004BB186 /* GDHttpRequest+Request.m in Sources */ = {isa = PBXBuildFile; fileRef = 4E38806A169DD064004BB186 /* GDHttpRequest+Request.m */; };
+		4E38806E169DD0F8004BB186 /* GDHttpUtil.m in Sources */ = {isa = PBXBuildFile; fileRef = 4E38806D169DD0F8004BB186 /* GDHttpUtil.m */; };
 		4E96A57316831EF5001AABEB /* TestFileManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 4E96A57216831EF5001AABEB /* TestFileManager.m */; };
 		4E96A57F16835319001AABEB /* GDCWriteStream+OutputStream.m in Sources */ = {isa = PBXBuildFile; fileRef = 4E96A57E16835318001AABEB /* GDCWriteStream+OutputStream.m */; };
 		4E96A585168354E1001AABEB /* TestBaseEncoder.m in Sources */ = {isa = PBXBuildFile; fileRef = 4E96A584168354E0001AABEB /* TestBaseEncoder.m */; };
@@ -60,8 +61,6 @@
 		4E0076ED1681B9E800908DE9 /* Default-568h@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Default-568h@2x.png"; sourceTree = "<group>"; };
 		4E0076F01681B9E800908DE9 /* en */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = en; path = en.lproj/MainStoryboard.storyboard; sourceTree = "<group>"; };
 		4E0076F31681B9E800908DE9 /* GDAssets.bundle */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.plug-in"; path = GDAssets.bundle; sourceTree = "<group>"; };
-		4E0076F51681B9E800908DE9 /* ViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ViewController.h; sourceTree = "<group>"; };
-		4E0076F61681B9E800908DE9 /* ViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ViewController.m; sourceTree = "<group>"; };
 		4E0076FD1681BA0000908DE9 /* chemistry_tm_logo_small.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = chemistry_tm_logo_small.png; sourceTree = "<group>"; };
 		4E0077001681BA9800908DE9 /* CMISAclService.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CMISAclService.h; sourceTree = "<group>"; };
 		4E0077011681BA9800908DE9 /* CMISAllowableActions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CMISAllowableActions.h; sourceTree = "<group>"; };
@@ -105,7 +104,6 @@
 		4E0077281681BA9800908DE9 /* CMISFolder.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CMISFolder.h; sourceTree = "<group>"; };
 		4E0077291681BA9800908DE9 /* CMISHttpDownloadRequest.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CMISHttpDownloadRequest.h; sourceTree = "<group>"; };
 		4E00772A1681BA9800908DE9 /* CMISHttpRequest.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CMISHttpRequest.h; sourceTree = "<group>"; };
-		4E00772B1681BA9800908DE9 /* CMISHttpRequestDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CMISHttpRequestDelegate.h; sourceTree = "<group>"; };
 		4E00772C1681BA9800908DE9 /* CMISHttpResponse.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CMISHttpResponse.h; sourceTree = "<group>"; };
 		4E00772D1681BA9800908DE9 /* CMISHttpUploadRequest.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CMISHttpUploadRequest.h; sourceTree = "<group>"; };
 		4E00772E1681BA9800908DE9 /* CMISHttpUtil.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CMISHttpUtil.h; sourceTree = "<group>"; };
@@ -150,11 +148,15 @@
 		4E0077551681BA9800908DE9 /* CMISVersioningService.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CMISVersioningService.h; sourceTree = "<group>"; };
 		4E0077561681BA9800908DE9 /* CMISWorkspace.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CMISWorkspace.h; sourceTree = "<group>"; };
 		4E0077571681BA9800908DE9 /* libObjectiveCMIS.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = libObjectiveCMIS.a; sourceTree = "<group>"; };
-		4E00775C1681BD1700908DE9 /* TestCMISNetworkIO.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TestCMISNetworkIO.h; sourceTree = "<group>"; };
-		4E00775D1681BD1700908DE9 /* TestCMISNetworkIO.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TestCMISNetworkIO.m; sourceTree = "<group>"; };
 		4E0077671682239500908DE9 /* env-cfg.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "env-cfg.plist"; sourceTree = "<group>"; };
 		4E0E13731684703D00AF36AB /* GDCCustomReadStream.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GDCCustomReadStream.h; sourceTree = "<group>"; };
 		4E0E13741684703D00AF36AB /* GDCCustomReadStream.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GDCCustomReadStream.m; sourceTree = "<group>"; };
+		4E38805C169D84AA004BB186 /* SampleTableViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SampleTableViewController.h; sourceTree = "<group>"; };
+		4E38805D169D84AA004BB186 /* SampleTableViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SampleTableViewController.m; sourceTree = "<group>"; };
+		4E388069169DD064004BB186 /* GDHttpRequest+Request.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "GDHttpRequest+Request.h"; sourceTree = "<group>"; };
+		4E38806A169DD064004BB186 /* GDHttpRequest+Request.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "GDHttpRequest+Request.m"; sourceTree = "<group>"; };
+		4E38806C169DD0F8004BB186 /* GDHttpUtil.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GDHttpUtil.h; sourceTree = "<group>"; };
+		4E38806D169DD0F8004BB186 /* GDHttpUtil.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GDHttpUtil.m; sourceTree = "<group>"; };
 		4E96A56E16831AEB001AABEB /* test_file.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = test_file.txt; sourceTree = "<group>"; };
 		4E96A57116831EF5001AABEB /* TestFileManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TestFileManager.h; sourceTree = "<group>"; };
 		4E96A57216831EF5001AABEB /* TestFileManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TestFileManager.m; sourceTree = "<group>"; };
@@ -227,12 +229,8 @@
 				4E0076E61681B9E800908DE9 /* AppDelegate.h */,
 				4E0076E71681B9E800908DE9 /* AppDelegate.m */,
 				4E0076EF1681B9E800908DE9 /* MainStoryboard.storyboard */,
-				4E0076F51681B9E800908DE9 /* ViewController.h */,
-				4E0076F61681B9E800908DE9 /* ViewController.m */,
 				4E0076F21681B9E800908DE9 /* Resources */,
 				4E0076DE1681B9E800908DE9 /* Supporting Files */,
-				4E00775C1681BD1700908DE9 /* TestCMISNetworkIO.h */,
-				4E00775D1681BD1700908DE9 /* TestCMISNetworkIO.m */,
 				4E96A57116831EF5001AABEB /* TestFileManager.h */,
 				4E96A57216831EF5001AABEB /* TestFileManager.m */,
 				4E96A57D16835318001AABEB /* GDCWriteStream+OutputStream.h */,
@@ -241,6 +239,12 @@
 				4E96A584168354E0001AABEB /* TestBaseEncoder.m */,
 				4E0E13731684703D00AF36AB /* GDCCustomReadStream.h */,
 				4E0E13741684703D00AF36AB /* GDCCustomReadStream.m */,
+				4E38805C169D84AA004BB186 /* SampleTableViewController.h */,
+				4E38805D169D84AA004BB186 /* SampleTableViewController.m */,
+				4E388069169DD064004BB186 /* GDHttpRequest+Request.h */,
+				4E38806A169DD064004BB186 /* GDHttpRequest+Request.m */,
+				4E38806C169DD0F8004BB186 /* GDHttpUtil.h */,
+				4E38806D169DD0F8004BB186 /* GDHttpUtil.m */,
 			);
 			path = TestMDMForCMIS;
 			sourceTree = "<group>";
@@ -315,7 +319,6 @@
 				4E0077281681BA9800908DE9 /* CMISFolder.h */,
 				4E0077291681BA9800908DE9 /* CMISHttpDownloadRequest.h */,
 				4E00772A1681BA9800908DE9 /* CMISHttpRequest.h */,
-				4E00772B1681BA9800908DE9 /* CMISHttpRequestDelegate.h */,
 				4E00772C1681BA9800908DE9 /* CMISHttpResponse.h */,
 				4E00772D1681BA9800908DE9 /* CMISHttpUploadRequest.h */,
 				4E00772E1681BA9800908DE9 /* CMISHttpUtil.h */,
@@ -436,12 +439,13 @@
 			files = (
 				4E0076E41681B9E800908DE9 /* main.m in Sources */,
 				4E0076E81681B9E800908DE9 /* AppDelegate.m in Sources */,
-				4E0076F71681B9E800908DE9 /* ViewController.m in Sources */,
-				4E00775E1681BD1700908DE9 /* TestCMISNetworkIO.m in Sources */,
 				4E96A57316831EF5001AABEB /* TestFileManager.m in Sources */,
 				4E96A57F16835319001AABEB /* GDCWriteStream+OutputStream.m in Sources */,
 				4E96A585168354E1001AABEB /* TestBaseEncoder.m in Sources */,
 				4E0E13751684703D00AF36AB /* GDCCustomReadStream.m in Sources */,
+				4E38805E169D84AA004BB186 /* SampleTableViewController.m in Sources */,
+				4E38806B169DD064004BB186 /* GDHttpRequest+Request.m in Sources */,
+				4E38806E169DD0F8004BB186 /* GDHttpUtil.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
