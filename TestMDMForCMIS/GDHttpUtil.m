@@ -23,6 +23,7 @@
 @property (nonatomic, copy) void (^completionBlock)(CMISHttpResponse *httpResponse, NSError *error);
 @property (nonatomic, strong) NSDictionary *headers;
 @property (nonatomic, strong) NSDictionary *authenticationHeader;
+
 - (void)prepareConnectionWithURL:(NSURL *)url
                       httpMethod:(CMISHttpRequestMethod)method
                          session:(CMISBindingSession *)session
@@ -39,7 +40,9 @@
 @synthesize requestMethod = _requestMethod;
 @synthesize headers = _headers;
 @synthesize receivedData = _receivedData;
-@synthesize authenticationHeader = _authenticationHeader;- (id)init
+@synthesize authenticationHeader = _authenticationHeader;
+
+- (id)init
 {
     self = [super init];
     if (self)
@@ -59,15 +62,45 @@
         case GDHttpRequest_OPENED:
         {
             NSLog(@"GDHttpRequest_OPENED");
-            [self.authenticationHeader enumerateKeysAndObjectsUsingBlock:^(NSString *key, NSString *value, BOOL *stop){
-                [request setRequestHeader:[key UTF8String] withValue:[value UTF8String]];
-            }];
+            if ([self.requestMethod isEqualToString:@"POST"])
+            {
+                [self.authenticationHeader enumerateKeysAndObjectsUsingBlock:^(NSString *key, NSString *value, BOOL *stop){
+                    [request setPostValue:[value UTF8String] forKey:[key UTF8String]];
+                }];
+            }
+            else
+            {
+                [self.authenticationHeader enumerateKeysAndObjectsUsingBlock:^(NSString *key, NSString *value, BOOL *stop){
+                    [request setRequestHeader:[key UTF8String] withValue:[value UTF8String]];
+                }];
+            }
             if (self.headers)
             {
-                
+                if ([self.requestMethod isEqualToString:@"POST"])
+                {
+                    [self.headers enumerateKeysAndObjectsUsingBlock:^(NSString *headerName, NSString *header, BOOL *stop) {
+                        [request setPostValue:[header UTF8String] forKey:[headerName UTF8String]];
+                    }];
+                }
+                else
+                {
+                    [self.headers enumerateKeysAndObjectsUsingBlock:^(NSString *headerName, NSString *header, BOOL *stop) {
+                        [request setRequestHeader:[headerName UTF8String] withValue:[header UTF8String]];
+                    }];
+                }
             }
-            [request send];
-            NSLog(@"GDHttpRequest_OPENED - after sending request");
+            
+            BOOL sendSuccess = NO;
+            if (self.requestBody)
+            {
+                sendSuccess = [request sendData:self.requestBody];
+            }
+            else
+            {
+                sendSuccess = [request send];                
+            }
+            
+            NSLog(@"GDHttpRequest_OPENED - after sending request. THe send request was %@",(sendSuccess ? @"successful" : @"not successful"));
             break;
         }
         case GDHttpRequest_DONE:
@@ -76,6 +109,8 @@
             int statusCode = [request getStatus];
             const char * messageText = [request getStatusText];
             NSString *message = [[NSString alloc] initWithUTF8String:messageText];
+            GDDirectByteBuffer *buffer = [request getReceiveBuffer];
+            [self.receivedData appendData:[buffer unreadData]];
             if (200 <= statusCode && 299 >= statusCode)
             {
                 NSLog(@"The HTTP request returns with HTTP status code ok, i.e. within 200-299");
@@ -90,12 +125,23 @@
                 self.completionBlock(nil, error);
             }
             self.completionBlock = nil;
+            [request close];
             break;
         }
         case GDHttpRequest_HEADERS_RECEIVED:
+        {
+            self.receivedData = [NSMutableData data];
+            const char * responseHeader = [request getAllResponseHeaders];
+            NSString *response = [[NSString alloc] initWithUTF8String:responseHeader];
+            NSLog(@"The response header message is %@", response);
             break;
+        }
         case GDHttpRequest_LOADING:
+        {
+            GDDirectByteBuffer *buffer = [request getReceiveBuffer];
+            [self.receivedData appendData:[buffer unreadData]];
             break;
+        }
         case GDHttpRequest_SENT:
             break;
         case GDHttpRequest_UNSENT:
@@ -140,7 +186,7 @@
     }
 }
 
-+ (CMISRequest *)invoke:(NSURL *)url
+- (CMISRequest *)invoke:(NSURL *)url
          withHttpMethod:(CMISHttpRequestMethod)httpRequestMethod
             withSession:(CMISBindingSession *)session
                    body:(NSData *)body
@@ -148,13 +194,12 @@
         completionBlock:(void (^)(CMISHttpResponse *httpResponse, NSError *error))completionBlock
 {
     CMISRequest *cancelRequest = [[CMISRequest alloc] init];
-    GDHttpUtil *httpUtil = [[GDHttpUtil alloc] init];
-    [httpUtil prepareConnectionWithURL:url httpMethod:httpRequestMethod session:session body:body headers:additionalHeaders completionBlock:completionBlock];
-    cancelRequest.httpRequest = httpUtil;
+    [self prepareConnectionWithURL:url httpMethod:httpRequestMethod session:session body:body headers:additionalHeaders completionBlock:completionBlock];
+    cancelRequest.httpRequest = self;
     return cancelRequest;
 }
 
-+ (CMISRequest *)invoke:(NSURL *)url
+- (CMISRequest *)invoke:(NSURL *)url
          withHttpMethod:(CMISHttpRequestMethod)httpRequestMethod
             withSession:(CMISBindingSession *)session
             inputStream:(NSInputStream *)inputStream
@@ -162,14 +207,11 @@
         completionBlock:(void (^)(CMISHttpResponse *httpResponse, NSError *error))completionBlock
 {
     CMISRequest *cancelRequest = [[CMISRequest alloc] init];
-    GDHttpUtil *httpUtil = [[GDHttpUtil alloc] init];
-    
-    cancelRequest.httpRequest = httpUtil;
     return cancelRequest;
 }
 
 
-+ (void)invoke:(NSURL *)url
+- (void)invoke:(NSURL *)url
 withHttpMethod:(CMISHttpRequestMethod)httpRequestMethod
    withSession:(CMISBindingSession *)session
    inputStream:(NSInputStream *)inputStream
@@ -179,11 +221,9 @@ completionBlock:(void (^)(CMISHttpResponse *httpResponse, NSError *error))comple
  progressBlock:(void (^)(unsigned long long bytesDownloaded, unsigned long long bytesTotal))progressBlock
  requestObject:(CMISRequest *)requestObject
 {
-    GDHttpUtil *httpUtil = [[GDHttpUtil alloc] init];
-    requestObject.httpRequest = httpUtil;
 }
 
-+ (void)invoke:(NSURL *)url
+- (void)invoke:(NSURL *)url
 withHttpMethod:(CMISHttpRequestMethod)httpRequestMethod
    withSession:(CMISBindingSession *)session
   outputStream:(NSOutputStream *)outputStream
@@ -192,13 +232,11 @@ completionBlock:(void (^)(CMISHttpResponse *httpResponse, NSError *error))comple
  progressBlock:(void (^)(unsigned long long bytesDownloaded, unsigned long long bytesTotal))progressBlock
  requestObject:(CMISRequest*)requestObject
 {
-    GDHttpUtil *httpUtil = [[GDHttpUtil alloc] init];
-    requestObject.httpRequest = httpUtil;    
 }
 
 
 
-+ (CMISRequest *)invokeGET:(NSURL *)url
+- (CMISRequest *)invokeGET:(NSURL *)url
                withSession:(CMISBindingSession *)session
            completionBlock:(void (^)(CMISHttpResponse *httpResponse, NSError *error))completionBlock
 {
@@ -210,7 +248,7 @@ completionBlock:(void (^)(CMISHttpResponse *httpResponse, NSError *error))comple
         completionBlock:completionBlock];
 }
 
-+ (CMISRequest *)invokePOST:(NSURL *)url
+- (CMISRequest *)invokePOST:(NSURL *)url
                 withSession:(CMISBindingSession *)session
                        body:(NSData *)body
                     headers:(NSDictionary *)additionalHeaders
@@ -224,7 +262,7 @@ completionBlock:(void (^)(CMISHttpResponse *httpResponse, NSError *error))comple
         completionBlock:completionBlock];
 }
 
-+ (CMISRequest *)invokePUT:(NSURL *)url
+- (CMISRequest *)invokePUT:(NSURL *)url
                withSession:(CMISBindingSession *)session
                       body:(NSData *)body
                    headers:(NSDictionary *)additionalHeaders
@@ -238,7 +276,7 @@ completionBlock:(void (^)(CMISHttpResponse *httpResponse, NSError *error))comple
         completionBlock:completionBlock];
 }
 
-+ (CMISRequest *)invokeDELETE:(NSURL *)url
+- (CMISRequest *)invokeDELETE:(NSURL *)url
                   withSession:(CMISBindingSession *)session
               completionBlock:(void (^)(CMISHttpResponse *httpResponse, NSError *error))completionBlock
 {
