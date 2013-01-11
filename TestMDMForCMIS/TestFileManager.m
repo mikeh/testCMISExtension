@@ -7,10 +7,51 @@
 //
 
 #import "TestFileManager.h"
+#import "CMISBase64Encoder.h"
+#import "GDCCustomReadStream.h"
 
 static NSString * kTMPDIRNAME = @"/tmp";
 
 @implementation TestFileManager
+
+
++ (void)encodeContentFromInputStream:(GDCReadStream *)inputStream andAppendToFile:(NSString *)filePath
+{
+    if (![inputStream hasBytesAvailable])
+    {
+        NSLog(@"We seem to have an empty stream");
+        return;
+    }
+    while ([inputStream hasBytesAvailable])
+    {
+        NSUInteger bufferSize = 524288;
+        uint8_t buffer[bufferSize];
+        NSUInteger readBytes = [inputStream read:buffer maxLength:bufferSize];
+        if (0 < readBytes)
+        {
+            NSMutableData *bytesRead = [NSMutableData data];
+            [bytesRead appendBytes:(const void *)buffer length:readBytes];
+            NSData *encodedBytes = [CMISBase64Encoder dataByEncodingText:bytesRead];
+            [TestFileManager appendToFileAtPath:filePath data:encodedBytes];
+        }
+    }
+    
+}
+
++ (GDCCustomReadStream *)inputStreamWithFileAtPath:(NSString *)filePath
+{
+    GDCCustomReadStream *inputStream = [GDCCustomReadStream inputStreamWithFileAtPath:filePath];
+    /*
+    NSError *error = nil;
+    GDCReadStream *readStream = [GDFileSystem getReadStream:filePath error:&error];
+    if (error)
+    {
+        NSLog(@"Error creating input stream with code %d and message %@", [error code], [error localizedDescription]);
+    }
+     */
+    return inputStream;
+}
+
 + (void)appendToFileAtPath:(NSString *)filePath data:(NSData *)data
 {
     GDFileStat stats;
@@ -22,13 +63,21 @@ static NSString * kTMPDIRNAME = @"/tmp";
         return;
     }
     NSInteger offset = stats.fileLen;
+    NSData *dataSoFar = [GDFileSystem readFromFile:filePath error:&error];
+    NSLog(@"the offset says we have %d bytes. The actual data length is %d", offset, [data length]);
+    NSLog(@"The data so far contains the following %@", [[NSString alloc] initWithData:dataSoFar encoding:NSUTF8StringEncoding]);
     success = [GDFileSystem writeToFile:data name:filePath fromOffset:offset error:&error];
     if (!success)
     {
         NSLog(@"In APPEND: we could not append the file file %@. Error code = %d and message is %@", filePath, [error code], [error localizedDescription]);
         return;
     }
-
+    
+    NSData *dataAfterWrite = [GDFileSystem readFromFile:filePath error:&error];
+    NSLog(@"the data we wrote to file are %@, and the total content is now %@",[[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding], [[NSString alloc] initWithData:dataAfterWrite encoding:NSUTF8StringEncoding]);
+    
+    
+    NSLog(@"We succeeded in calling appendToFilePath and added %d data to the end of the file from offset %d", [data length], offset);
 }
 
 /*
@@ -107,6 +156,7 @@ static NSString * kTMPDIRNAME = @"/tmp";
     NSString *tmpDirectory = [self temporaryDirectory];
     if (tmpDirectory)
     {
+        NSLog(@"Temporary file name created: %@", [NSString stringWithFormat:@"%@/%@", tmpDirectory, fileName]);
         return [NSString stringWithFormat:@"%@/%@", tmpDirectory, fileName];
     }
     else

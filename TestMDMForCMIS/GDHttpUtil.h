@@ -7,6 +7,7 @@
 //
 
 #import <Foundation/Foundation.h>
+#import <GD/GDFileSystem.h>
 #import <GD/GDNETiOS.h>
 #import "CMISHttpInvokerDelegate.h"
 

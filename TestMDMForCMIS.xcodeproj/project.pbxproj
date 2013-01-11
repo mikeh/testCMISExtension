@@ -30,11 +30,9 @@
 		4E0077681682239500908DE9 /* env-cfg.plist in Resources */ = {isa = PBXBuildFile; fileRef = 4E0077671682239500908DE9 /* env-cfg.plist */; };
 		4E0E13751684703D00AF36AB /* GDCCustomReadStream.m in Sources */ = {isa = PBXBuildFile; fileRef = 4E0E13741684703D00AF36AB /* GDCCustomReadStream.m */; };
 		4E38805E169D84AA004BB186 /* SampleTableViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 4E38805D169D84AA004BB186 /* SampleTableViewController.m */; };
-		4E38806B169DD064004BB186 /* GDHttpRequest+Request.m in Sources */ = {isa = PBXBuildFile; fileRef = 4E38806A169DD064004BB186 /* GDHttpRequest+Request.m */; };
 		4E38806E169DD0F8004BB186 /* GDHttpUtil.m in Sources */ = {isa = PBXBuildFile; fileRef = 4E38806D169DD0F8004BB186 /* GDHttpUtil.m */; };
 		4E96A57316831EF5001AABEB /* TestFileManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 4E96A57216831EF5001AABEB /* TestFileManager.m */; };
 		4E96A57F16835319001AABEB /* GDCWriteStream+OutputStream.m in Sources */ = {isa = PBXBuildFile; fileRef = 4E96A57E16835318001AABEB /* GDCWriteStream+OutputStream.m */; };
-		4E96A585168354E1001AABEB /* TestBaseEncoder.m in Sources */ = {isa = PBXBuildFile; fileRef = 4E96A584168354E0001AABEB /* TestBaseEncoder.m */; };
 		4EB9893316838297007C42E4 /* test_file.txt in Resources */ = {isa = PBXBuildFile; fileRef = 4E96A56E16831AEB001AABEB /* test_file.txt */; };
 /* End PBXBuildFile section */
 
@@ -84,7 +82,6 @@
 		4E0077131681BA9800908DE9 /* CMISAtomPubVersioningService.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CMISAtomPubVersioningService.h; sourceTree = "<group>"; };
 		4E0077141681BA9800908DE9 /* CMISAuthenticationProvider.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CMISAuthenticationProvider.h; sourceTree = "<group>"; };
 		4E0077151681BA9800908DE9 /* CMISBase64Encoder.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CMISBase64Encoder.h; sourceTree = "<group>"; };
-		4E0077161681BA9800908DE9 /* CMISBase64EncoderDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CMISBase64EncoderDelegate.h; sourceTree = "<group>"; };
 		4E0077171681BA9800908DE9 /* CMISBaseTest.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CMISBaseTest.h; sourceTree = "<group>"; };
 		4E0077181681BA9800908DE9 /* CMISBinding.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CMISBinding.h; sourceTree = "<group>"; };
 		4E0077191681BA9800908DE9 /* CMISBindingFactory.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CMISBindingFactory.h; sourceTree = "<group>"; };
@@ -153,8 +150,6 @@
 		4E0E13741684703D00AF36AB /* GDCCustomReadStream.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GDCCustomReadStream.m; sourceTree = "<group>"; };
 		4E38805C169D84AA004BB186 /* SampleTableViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SampleTableViewController.h; sourceTree = "<group>"; };
 		4E38805D169D84AA004BB186 /* SampleTableViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SampleTableViewController.m; sourceTree = "<group>"; };
-		4E388069169DD064004BB186 /* GDHttpRequest+Request.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "GDHttpRequest+Request.h"; sourceTree = "<group>"; };
-		4E38806A169DD064004BB186 /* GDHttpRequest+Request.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "GDHttpRequest+Request.m"; sourceTree = "<group>"; };
 		4E38806C169DD0F8004BB186 /* GDHttpUtil.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GDHttpUtil.h; sourceTree = "<group>"; };
 		4E38806D169DD0F8004BB186 /* GDHttpUtil.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GDHttpUtil.m; sourceTree = "<group>"; };
 		4E96A56E16831AEB001AABEB /* test_file.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = test_file.txt; sourceTree = "<group>"; };
@@ -162,8 +157,8 @@
 		4E96A57216831EF5001AABEB /* TestFileManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TestFileManager.m; sourceTree = "<group>"; };
 		4E96A57D16835318001AABEB /* GDCWriteStream+OutputStream.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "GDCWriteStream+OutputStream.h"; sourceTree = "<group>"; };
 		4E96A57E16835318001AABEB /* GDCWriteStream+OutputStream.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "GDCWriteStream+OutputStream.m"; sourceTree = "<group>"; };
-		4E96A583168354E0001AABEB /* TestBaseEncoder.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TestBaseEncoder.h; sourceTree = "<group>"; };
-		4E96A584168354E0001AABEB /* TestBaseEncoder.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TestBaseEncoder.m; sourceTree = "<group>"; };
+		4EE3B19416A0545F00A29E25 /* AlfrescoFileManagerDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AlfrescoFileManagerDelegate.h; sourceTree = "<group>"; };
+		4EE3B19516A0547900A29E25 /* CMISHttpInvokerDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CMISHttpInvokerDelegate.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -235,14 +230,10 @@
 				4E96A57216831EF5001AABEB /* TestFileManager.m */,
 				4E96A57D16835318001AABEB /* GDCWriteStream+OutputStream.h */,
 				4E96A57E16835318001AABEB /* GDCWriteStream+OutputStream.m */,
-				4E96A583168354E0001AABEB /* TestBaseEncoder.h */,
-				4E96A584168354E0001AABEB /* TestBaseEncoder.m */,
 				4E0E13731684703D00AF36AB /* GDCCustomReadStream.h */,
 				4E0E13741684703D00AF36AB /* GDCCustomReadStream.m */,
 				4E38805C169D84AA004BB186 /* SampleTableViewController.h */,
 				4E38805D169D84AA004BB186 /* SampleTableViewController.m */,
-				4E388069169DD064004BB186 /* GDHttpRequest+Request.h */,
-				4E38806A169DD064004BB186 /* GDHttpRequest+Request.m */,
 				4E38806C169DD0F8004BB186 /* GDHttpUtil.h */,
 				4E38806D169DD0F8004BB186 /* GDHttpUtil.m */,
 			);
@@ -277,6 +268,8 @@
 		4E0076FF1681BA7700908DE9 /* CMIS */ = {
 			isa = PBXGroup;
 			children = (
+				4EE3B19516A0547900A29E25 /* CMISHttpInvokerDelegate.h */,
+				4EE3B19416A0545F00A29E25 /* AlfrescoFileManagerDelegate.h */,
 				4E0077001681BA9800908DE9 /* CMISAclService.h */,
 				4E0077011681BA9800908DE9 /* CMISAllowableActions.h */,
 				4E0077021681BA9800908DE9 /* CMISAllowableActionsParser.h */,
@@ -299,7 +292,6 @@
 				4E0077131681BA9800908DE9 /* CMISAtomPubVersioningService.h */,
 				4E0077141681BA9800908DE9 /* CMISAuthenticationProvider.h */,
 				4E0077151681BA9800908DE9 /* CMISBase64Encoder.h */,
-				4E0077161681BA9800908DE9 /* CMISBase64EncoderDelegate.h */,
 				4E0077171681BA9800908DE9 /* CMISBaseTest.h */,
 				4E0077181681BA9800908DE9 /* CMISBinding.h */,
 				4E0077191681BA9800908DE9 /* CMISBindingFactory.h */,
@@ -441,10 +433,8 @@
 				4E0076E81681B9E800908DE9 /* AppDelegate.m in Sources */,
 				4E96A57316831EF5001AABEB /* TestFileManager.m in Sources */,
 				4E96A57F16835319001AABEB /* GDCWriteStream+OutputStream.m in Sources */,
-				4E96A585168354E1001AABEB /* TestBaseEncoder.m in Sources */,
 				4E0E13751684703D00AF36AB /* GDCCustomReadStream.m in Sources */,
 				4E38805E169D84AA004BB186 /* SampleTableViewController.m in Sources */,
-				4E38806B169DD064004BB186 /* GDHttpRequest+Request.m in Sources */,
 				4E38806E169DD0F8004BB186 /* GDHttpUtil.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -493,7 +483,7 @@
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNINITIALIZED_AUTOS = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 6.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 5.1;
 				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = iphoneos;
 			};
@@ -514,7 +504,7 @@
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNINITIALIZED_AUTOS = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 6.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 5.1;
 				OTHER_CFLAGS = "-DNS_BLOCK_ASSERTIONS=1";
 				SDKROOT = iphoneos;
 				VALIDATE_PRODUCT = YES;

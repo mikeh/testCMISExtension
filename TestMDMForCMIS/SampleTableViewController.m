@@ -15,10 +15,10 @@
 #import "GDCCustomReadStream.h"
 #import "GDCWriteStream+OutputStream.h"
 #import "TestFileManager.h"
-#import "TestBaseEncoder.h"
 #import "CMISConstants.h"
 #import <GD/GDFileSystem.h>
 #import "GDHttpUtil.h"
+#import "CMISFileUtil.h"
 
 @interface SampleTableViewController ()
 @property (nonatomic, strong) CMISSession * session;
@@ -115,22 +115,20 @@
     parameters.password = password;
     parameters.repositoryId = repositoryId;
     parameters.atomPubUrl = [NSURL URLWithString:url];
-    
+    /**
+     File IO setting. We need to have the test manager defined here
+     */
     NSMutableDictionary *paramExtensions = [NSMutableDictionary dictionary];
     const char * fileManagerName = class_getName([TestFileManager class]);
-    const char * baseEncoderName = class_getName([TestBaseEncoder class]);
-    const char * outputName = class_getName([GDCWriteStream class]);
-    const char * inputName = class_getName([GDCCustomReadStream class]);
-    
     [paramExtensions setObject:[NSString stringWithUTF8String:fileManagerName] forKey:kCMISSessionParameterCustomFileManager];
-    [paramExtensions setObject:[NSString stringWithUTF8String:baseEncoderName] forKey:kCMISSessionParameterCustomBaseEncoder];
-    [paramExtensions setObject:[NSString stringWithUTF8String:outputName] forKey:kCMISSessionParameterCustomFileOutputStream];
-    [paramExtensions setObject:[NSString stringWithUTF8String:inputName] forKey:kCMISSessionParameterCustomFileInputStream];
-    
     [parameters setObject:paramExtensions forKey:kCMISSessionParameterCustomFileIO];
-    
-    const char * networkClassName = class_getName([GDHttpUtil class]);
+
+
+    /**
+     Network IO setting. We need to provide the HTTP invoker here
+     */
     NSMutableDictionary *networkExtension = [NSMutableDictionary dictionary];
+    const char * networkClassName = class_getName([GDHttpUtil class]);
     [networkExtension setObject:[NSString stringWithUTF8String:networkClassName] forKey:kCMISSessionParameterCustomRequest];
     [parameters setObject:networkExtension forKey:kCMISSessionParameterCustomNetworkIO];
     
@@ -186,8 +184,9 @@
     {
         return;
     }
+    NSLog(@"We are in uploadFile");
     NSString *filePath = [self prepareTestFileForUpload];
-    if (filePath)
+    if (filePath && self.rootFolder)
     {
         NSURL *fileURL = [NSURL URLWithString:filePath];
         NSString *documentName = [fileURL lastPathComponent];
@@ -195,6 +194,50 @@
         NSMutableDictionary *documentProperties = [NSMutableDictionary dictionary];
         [documentProperties setObject:documentName forKey:kCMISPropertyName];
         [documentProperties setObject:kCMISPropertyObjectTypeIdValueDocument forKey:kCMISPropertyObjectTypeId];
+        NSError *error = nil;
+        GDCReadStream *inputStream = [GDFileSystem getReadStream:filePath error:&error];
+        GDFileStat myStat;
+        NSError *outError = nil;
+        BOOL success = [GDFileSystem getFileStat:filePath to:&myStat error:&outError];
+        if (inputStream && success)
+        {
+            unsigned long long bytesExpected = myStat.fileLen;
+            NSLog(@"the expected file length to be uploaded is %lld",myStat.fileLen);
+            [self.rootFolder createDocumentFromInputStream:inputStream
+                                              withMimeType:@"text/plain"
+                                            withProperties:documentProperties
+                                             bytesExpected:bytesExpected
+                                           completionBlock:^(NSString *objectId, NSError *error){
+                                               if (nil == objectId)
+                                               {
+                                                   NSLog(@"CMIS upload of test document failed. Error is %d with message %@", [error code], [error localizedDescription]);
+                                                   self.testDocId = nil;
+                                               }
+                                               else
+                                               {
+                                                   NSLog(@"Upload succeeded and the object ID is %@", objectId);
+                                                   self.testDocId = objectId;
+                                                   self.removeCell.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
+                                                   self.removeCell.selectionStyle = UITableViewCellSelectionStyleGray;
+                                                   self.removeLabel.textColor = [UIColor blackColor];
+                                                   self.canRemoveCMISDoc = YES;
+                                               }
+                                           }
+                                             progressBlock:^(unsigned long long bytesUploaded, unsigned long long bytesTotal){}];
+        }
+        else
+        {
+            NSLog(@"either the input stream is nil or we couldn't get the file stats");
+            if (error)
+            {
+                NSLog(@"input stream is nil. Error code is %d and message %@",[error code], [error localizedDescription]);
+            }
+            if(outError)
+            {
+                NSLog(@"file stats error. Error code is %d and message %@",[outError code], [outError localizedDescription]);                
+            }
+        }
+        /*
         if (self.rootFolder)
         {
             [self.rootFolder createDocumentFromFilePath:filePath
@@ -217,7 +260,7 @@
                                             }
                                         } progressBlock:^(unsigned long long bytesUploaded, unsigned long long bytesTotal){}];
         }
-        
+        */
     }
     
 }
@@ -324,9 +367,31 @@
     
 }
 
+/**
+ this is creating a tmp file in the standard IO file system
+ */
+- (NSString *)temporaryTestFileForUpload
+{
+    NSString *filePath = [[NSBundle bundleForClass:[self class]] pathForResource:@"test_file.txt" ofType:nil];
+    NSFileHandle *fileHandle = [NSFileHandle fileHandleForUpdatingAtPath:filePath];
+    NSData *content = [fileHandle readDataToEndOfFile];
+
+    NSDateFormatter *formatter = [[NSDateFormatter alloc] init];
+    [formatter setDateFormat: @"yyyy-MM-dd'T'HH-mm-ss-Z'"];
+    NSString *documentName = [NSString stringWithFormat:@"test_file_%@.txt", [formatter stringFromDate:[NSDate date]]];
+    NSString * tmpPath = [FileUtil internalFilePathFromName:documentName];
+
+    NSError *error = nil;
+    [FileUtil createFileAtPath:tmpPath contents:content error:&error];
+
+    [fileHandle closeFile];
+    return tmpPath;
+}
+
 
 - (NSString *)prepareTestFileForUpload
 {
+    NSLog(@"We are in prepareTestFileForUpload");
     NSString *filePath = [[NSBundle bundleForClass:[self class]] pathForResource:@"test_file.txt" ofType:nil];
     NSFileHandle *fileHandle = [NSFileHandle fileHandleForUpdatingAtPath:filePath];
     NSData *content = [fileHandle readDataToEndOfFile];
