@@ -38,17 +38,17 @@ static NSString * kTMPDIRNAME = @"/tmp";
     
 }
 
-+ (GDCCustomReadStream *)inputStreamWithFileAtPath:(NSString *)filePath
++ (GDCReadStream *)inputStreamWithFileAtPath:(NSString *)filePath
 {
-    GDCCustomReadStream *inputStream = [GDCCustomReadStream inputStreamWithFileAtPath:filePath];
+//    GDCCustomReadStream *inputStream = [GDCCustomReadStream inputStreamWithFileAtPath:filePath];
     /*
+     */
     NSError *error = nil;
-    GDCReadStream *readStream = [GDFileSystem getReadStream:filePath error:&error];
+    GDCReadStream *inputStream = [GDFileSystem getReadStream:filePath error:&error];
     if (error)
     {
         NSLog(@"Error creating input stream with code %d and message %@", [error code], [error localizedDescription]);
     }
-     */
     return inputStream;
 }
 
@@ -63,9 +63,36 @@ static NSString * kTMPDIRNAME = @"/tmp";
         return;
     }
     NSInteger offset = stats.fileLen;
-    NSData *dataSoFar = [GDFileSystem readFromFile:filePath error:&error];
+    
+    /*
+    GDCWriteStream *writeStream = [GDFileSystem getWriteStream:filePath appendmode:YES error:&error];
+    if (!writeStream)
+    {
+        NSLog(@"couldn't create a write stream");
+        return;
+    }
+    if (![writeStream hasSpaceAvailable])
+    {
+        NSLog(@"no space available in write stream");
+        return;
+    }
+    
+    NSUInteger bufferSize = [data length];
+    uint8_t buffer[bufferSize];
+    [data getBytes:buffer length:bufferSize];
+    NSUInteger byteswritten = [writeStream write:(const uint8_t *)(&buffer) maxLength:bufferSize];
+    if (byteswritten != -1)
+    {
+        NSLog(@"we wrote %d bytes", byteswritten);
+        NSLog(@"We succeeded in calling appendToFilePath and added %d data to the end of the file from offset %d", [data length], offset);
+    }
+    else
+    {
+        NSLog(@"somehow we failed to write to the file");
+    }
+     */
+    
     NSLog(@"the offset says we have %d bytes. The actual data length is %d", offset, [data length]);
-    NSLog(@"The data so far contains the following %@", [[NSString alloc] initWithData:dataSoFar encoding:NSUTF8StringEncoding]);
     success = [GDFileSystem writeToFile:data name:filePath fromOffset:offset error:&error];
     if (!success)
     {
@@ -73,11 +100,6 @@ static NSString * kTMPDIRNAME = @"/tmp";
         return;
     }
     
-    NSData *dataAfterWrite = [GDFileSystem readFromFile:filePath error:&error];
-    NSLog(@"the data we wrote to file are %@, and the total content is now %@",[[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding], [[NSString alloc] initWithData:dataAfterWrite encoding:NSUTF8StringEncoding]);
-    
-    
-    NSLog(@"We succeeded in calling appendToFilePath and added %d data to the end of the file from offset %d", [data length], offset);
 }
 
 /*

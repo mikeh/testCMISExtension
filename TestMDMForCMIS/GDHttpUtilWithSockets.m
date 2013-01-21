@@ -1,12 +1,12 @@
 //
-//  GDHttpUtil.m
+//  GDHttpUtilWithSockets.m
 //  TestMDMForCMIS
 //
-//  Created by Peter Schmidt on 09/01/2013.
+//  Created by Peter Schmidt on 21/01/2013.
 //  Copyright (c) 2013 Peter Schmidt. All rights reserved.
 //
 
-#import "GDHttpUtil.h"
+#import "GDHttpUtilWithSockets.h"
 #import "CMISAuthenticationProvider.h"
 #import "CMISErrors.h"
 #import "CMISHttpRequest.h"
@@ -16,7 +16,7 @@
 #import "CMISSessionParameters.h"
 #import "CMISNetworkProvider.h"
 
-@interface GDHttpUtil ()
+@interface GDHttpUtilWithSockets ()
 @property (nonatomic, strong) NSData *requestBody;
 @property (nonatomic, strong) NSData *uploadData;
 @property (nonatomic, strong) NSMutableData *receivedData;
@@ -28,13 +28,7 @@
 @property (nonatomic, assign) unsigned long long bytesExpected;
 @property (nonatomic, strong) GDCWriteStream * outputStream;
 @property (nonatomic, strong) GDCReadStream * inputStream;
-
-- (void)prepareHeaders:(GDHttpRequest *)request;
-
-- (NSData *)dataFromInput;
-
-- (void)readFromBuffer:(GDDirectByteBuffer *)buffer;
-
++ (NSString *)httpMethodString:(CMISHttpRequestMethod) requestMethod;
 - (void)prepareConnectionWithURL:(NSURL *)url
                          session:(CMISBindingSession *)session
                           method:(NSString *)httpMethod
@@ -45,12 +39,13 @@
                    bytesExpected:(unsigned long long)expected
                  completionBlock:(void (^)(CMISHttpResponse *httpResponse, NSError *error))completionBlock
                    progressBlock:(void (^)(unsigned long long bytesDownloaded, unsigned long long bytesTotal))progressBlock;
-
-+ (NSString *)httpMethodString:(CMISHttpRequestMethod) requestMethod;
+- (void)prepareHeaders;
+- (NSData *)dataFromInput;
+- (void)readFromBuffer:(GDDirectByteBuffer *)buffer;
 @end
 
-@implementation GDHttpUtil
-@synthesize httpRequest = _httpRequest;
+@implementation GDHttpUtilWithSockets
+@synthesize socket = _socket;
 @synthesize completionBlock = _completionBlock;
 @synthesize requestBody = _requestBody;
 @synthesize requestMethod = _requestMethod;
@@ -62,123 +57,37 @@
 @synthesize bytesExpected = _bytesExpected;
 @synthesize progressBlock = _progressBlock;
 @synthesize uploadData = _uploadData;
-- (id)init
+
+#pragma custom initialisers
+- (id)initWithURLString:(NSString *)urlString
+{
+    return [self initWithURLString:urlString port:443 isSSL:YES];
+}
+
+
+- (id)initWithURLString:(NSString *)urlString port:(NSUInteger)port isSSL:(BOOL)isSSL
 {
     self = [super init];
-    if (self)
+    if (nil != self)
     {
-        self.httpRequest = [[GDHttpRequest alloc] init];
-        self.httpRequest.delegate = self;
+        self.socket = [[GDSocket alloc] init:[urlString UTF8String] onPort:port andUseSSL:isSSL];
+        self.socket.delegate = self;
     }
     return self;
 }
 
-
-- (void)onStatusChange:(GDHttpRequest *)request
-{
-    GDHttpRequest_state_t requestState = [request getState];
-    switch (requestState)
-    {
-        case GDHttpRequest_OPENED:
-        {
-            NSLog(@"GDHttpRequest_OPENED");
-            [self prepareHeaders:request];
-            
-            BOOL sendSuccess = NO;
-            if (self.requestBody)
-            {
-                sendSuccess = [request sendData:self.requestBody];
-            }
-            else if (self.inputStream)
-            {
-                self.uploadData = [self dataFromInput];
-                if (nil == self.uploadData)
-                {
-                    NSLog(@"since we got no data - close the request again");
-                    [request close];
-                }
-                else
-                {
-                    NSLog(@"The data content we want to send is %@",[[NSString alloc] initWithData:self.uploadData encoding:NSUTF8StringEncoding]);
-//                    const char * bytes = (const char *)[self.uploadData bytes];
-//                    sendSuccess = [request send:bytes withLength:[self.uploadData length] withTimeout:0];
-                    sendSuccess = [request sendData:self.uploadData];
-                }
-            }
-            else
-            {
-                sendSuccess = [request send];                
-            }
-            
-            NSLog(@"GDHttpRequest_OPENED - after sending request. THe send request was %@",(sendSuccess ? @"successful" : @"not successful"));
-            break;
-        }
-        case GDHttpRequest_DONE:
-        {
-            NSLog(@"GDHttpRequest_DONE");
-            int statusCode = [request getStatus];
-            const char * messageText = [request getStatusText];
-            NSString *message = [[NSString alloc] initWithUTF8String:messageText];
-            GDDirectByteBuffer *buffer = [request getReceiveBuffer];
-            [self readFromBuffer:buffer];
-            if (200 <= statusCode && 299 >= statusCode)
-            {
-                NSLog(@"The HTTP request returns with HTTP ok status code %d",statusCode);
-                if (self.receivedData)
-                {
-                    NSLog(@"The amount of data we get back is %d",[self.receivedData length]);
-                }
-                CMISHttpResponse * httpResponse = [CMISHttpResponse responseWithStatusCode:statusCode statusMessage:message headers:nil responseData:self.receivedData];
-                self.completionBlock(httpResponse, nil);
-            }
-            else
-            {
-                NSLog(@"We get a error as HTTP status: %d and message %@", statusCode, message);
-                NSError * error = [CMISErrors createCMISErrorWithCode:kCMISErrorCodeFilterNotValid
-                                              withDetailedDescription:message];
-                self.completionBlock(nil, error);
-            }
-            self.completionBlock = nil;
-            [request close];
-            break;
-        }
-        case GDHttpRequest_HEADERS_RECEIVED:
-        {
-            if (!self.outputStream)
-            {
-                self.receivedData = [NSMutableData data];
-            }
-            const char * responseHeader = [request getAllResponseHeaders];
-            NSString *response = [[NSString alloc] initWithUTF8String:responseHeader];
-            NSLog(@"The response header message is %@", response);
-            break;
-        }
-        case GDHttpRequest_LOADING:
-        {
-            GDDirectByteBuffer *buffer = [request getReceiveBuffer];
-            [self readFromBuffer:buffer];
-            break;
-        }
-        case GDHttpRequest_SENT:
-            break;
-        case GDHttpRequest_UNSENT:
-            break;
-        default:
-            break;
-    }
-    
-}
-
-
+#pragma custom cancel method needed for CMISRequest
 - (void)cancel
 {
-    if (self.httpRequest)
+    if (self.socket)
     {
-        [self.httpRequest abort];
-        self.completionBlock = nil;
+        [self.socket disconnect];
     }
+    self.completionBlock = nil;    
 }
 
+
+#pragma CMISHttpInvokerDelegate methods
 
 - (CMISRequest *)invoke:(NSURL *)url
          withHttpMethod:(CMISHttpRequestMethod)httpRequestMethod
@@ -187,20 +96,7 @@
                 headers:(NSDictionary *)additionalHeaders
         completionBlock:(void (^)(CMISHttpResponse *httpResponse, NSError *error))completionBlock
 {
-    CMISRequest *cancelRequest = [[CMISRequest alloc] init];
-    [self prepareConnectionWithURL:url
-                           session:session
-                            method:[GDHttpUtil httpMethodString:httpRequestMethod]
-                              body:body
-                           headers:additionalHeaders
-                       inputStream:nil
-                      outputStream:nil
-                     bytesExpected:0
-                   completionBlock:completionBlock
-                     progressBlock:nil];
-    
-    cancelRequest.httpRequest = self;
-    return cancelRequest;
+    return nil;
 }
 
 - (CMISRequest *)invoke:(NSURL *)url
@@ -210,21 +106,7 @@
                 headers:(NSDictionary *)additionalHeaders
         completionBlock:(void (^)(CMISHttpResponse *httpResponse, NSError *error))completionBlock
 {
-    CMISRequest *cancelRequest = [[CMISRequest alloc] init];
-
-    [self prepareConnectionWithURL:url
-                           session:session
-                            method:[GDHttpUtil httpMethodString:httpRequestMethod]
-                              body:nil
-                           headers:additionalHeaders
-                       inputStream:(GDCReadStream *)inputStream
-                      outputStream:nil
-                     bytesExpected:0
-                   completionBlock:completionBlock
-                     progressBlock:nil];
-        
-    cancelRequest.httpRequest = self;
-    return cancelRequest;
+    return nil;
 }
 
 
@@ -238,18 +120,9 @@ completionBlock:(void (^)(CMISHttpResponse *httpResponse, NSError *error))comple
  progressBlock:(void (^)(unsigned long long bytesDownloaded, unsigned long long bytesTotal))progressBlock
  requestObject:(CMISRequest *)requestObject
 {
-    [self prepareConnectionWithURL:url
-                           session:session
-                            method:[GDHttpUtil httpMethodString:httpRequestMethod]
-                              body:nil
-                           headers:additionalHeaders
-                       inputStream:(GDCReadStream *)inputStream
-                      outputStream:nil
-                     bytesExpected:bytesExpected
-                   completionBlock:completionBlock
-                     progressBlock:progressBlock];
-    requestObject.httpRequest = self;
+    
 }
+
 
 - (void)invoke:(NSURL *)url
 withHttpMethod:(CMISHttpRequestMethod)httpRequestMethod
@@ -260,17 +133,7 @@ completionBlock:(void (^)(CMISHttpResponse *httpResponse, NSError *error))comple
  progressBlock:(void (^)(unsigned long long bytesDownloaded, unsigned long long bytesTotal))progressBlock
  requestObject:(CMISRequest*)requestObject
 {
-    [self prepareConnectionWithURL:url
-                           session:session
-                            method:[GDHttpUtil httpMethodString:httpRequestMethod]
-                              body:nil
-                           headers:nil
-                       inputStream:nil
-                      outputStream:(GDCWriteStream *)outputStream
-                     bytesExpected:bytesExpected
-                   completionBlock:completionBlock
-                     progressBlock:progressBlock];
-    requestObject.httpRequest = self;
+    
 }
 
 
@@ -327,34 +190,34 @@ completionBlock:(void (^)(CMISHttpResponse *httpResponse, NSError *error))comple
         completionBlock:completionBlock];
 }
 
+#pragma GDSocketDelegate methods
+- (void)onClose:(id)socket
+{
+    
+}
+
+- (void)onErr:(int)error inSocket:(id)socket
+{
+    
+}
+
+- (void)onOpen:(id)socket
+{
+    
+}
+
+- (void)onRead:(id)socket
+{
+    
+}
+
 #pragma private methods
 
-- (void)prepareHeaders:(GDHttpRequest *)request
+- (void)prepareHeaders
 {
-    [self.authenticationHeader enumerateKeysAndObjectsUsingBlock:^(NSString *key, NSString *value, BOOL *stop){
-        [request setRequestHeader:[key UTF8String] withValue:[value UTF8String]];
-    }];
-    if (self.headers)
-    {
-        [self.headers enumerateKeysAndObjectsUsingBlock:^(NSString *headerName, NSString *header, BOOL *stop) {
-            [request setRequestHeader:[headerName UTF8String] withValue:[header UTF8String]];
-        }];
-        /*
-        if ([self.requestMethod isEqualToString:@"POST"])
-        {
-            [self.headers enumerateKeysAndObjectsUsingBlock:^(NSString *headerName, NSString *header, BOOL *stop) {
-                [request setPostValue:[header UTF8String] forKey:[headerName UTF8String]];
-            }];
-        }
-        else
-        {
-            [self.headers enumerateKeysAndObjectsUsingBlock:^(NSString *headerName, NSString *header, BOOL *stop) {
-                [request setRequestHeader:[headerName UTF8String] withValue:[header UTF8String]];
-            }];
-        }
-         */
-    }    
+    
 }
+
 
 - (void)prepareConnectionWithURL:(NSURL *)url
                          session:(CMISBindingSession *)session
@@ -367,27 +230,9 @@ completionBlock:(void (^)(CMISHttpResponse *httpResponse, NSError *error))comple
                  completionBlock:(void (^)(CMISHttpResponse *httpResponse, NSError *error))completionBlock
                    progressBlock:(void (^)(unsigned long long bytesDownloaded, unsigned long long bytesTotal))progressBlock
 {
-    self.requestBody = body;
-    self.requestMethod = httpMethod;
-    self.headers = headers;
-    self.inputStream = inputStream;
-    self.outputStream = outputStream;
-    self.bytesExpected = expected;
-    self.completionBlock = completionBlock;
-    self.progressBlock = progressBlock;
-    id <CMISAuthenticationProvider> authenticationProvider = session.authenticationProvider;
-    self.authenticationHeader = [NSDictionary dictionaryWithDictionary:authenticationProvider.httpHeadersToApply];
-    BOOL success = [self.httpRequest open:[self.requestMethod UTF8String] withUrl:[[url absoluteString] UTF8String] withAsync:YES];
-    if (success)
-    {
-        NSLog(@"We were able to create the httpRequest");
-    }
-    else
-    {
-        NSLog(@"We failed to create the httpRequest");
-    }
     
 }
+
 
 - (NSData *)dataFromInput
 {
@@ -414,10 +259,10 @@ completionBlock:(void (^)(CMISHttpResponse *httpResponse, NSError *error))comple
             bytesRead += readBytes;
         }
     }
-//    [uploadData appendBytes:(const void *)nullBuffer length:1];
-//    bytesRead++;
+    //    [uploadData appendBytes:(const void *)nullBuffer length:1];
+    //    bytesRead++;
     NSLog(@"GDHttpUtil::dataFromInput Number of bytes being read from input stream is %d", bytesRead);
-    return uploadData;    
+    return uploadData;
 }
 
 - (void)readFromBuffer:(GDDirectByteBuffer *)buffer
@@ -441,7 +286,7 @@ completionBlock:(void (^)(CMISHttpResponse *httpResponse, NSError *error))comple
     else
     {
         [self.receivedData appendData:[buffer unreadData]];
-    }    
+    }
 }
 
 
