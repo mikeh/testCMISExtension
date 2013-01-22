@@ -148,6 +148,7 @@ andIncludeAllowableActions:(BOOL)includeAllowableActions
 */
 - (void)deleteObject:(NSString *)objectId allVersions:(BOOL)allVersions completionBlock:(void (^)(BOOL objectDeleted, NSError *error))completionBlock;
 
+
 /**
 * Creates a new folder with given properties under the provided parent folder.
 */

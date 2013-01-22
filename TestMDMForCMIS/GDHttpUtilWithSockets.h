@@ -14,7 +14,5 @@
 @interface GDHttpUtilWithSockets : NSObject <CMISHttpInvokerDelegate, GDSocketDelegate>
 @property (nonatomic, strong) GDSocket *socket;
 
-- (id)initWithURLString:(NSString *)urlString port:(NSUInteger)port isSSL:(BOOL)isSSL;
-- (id)initWithURLString:(NSString *)urlString;
 - (void)cancel;
 @end

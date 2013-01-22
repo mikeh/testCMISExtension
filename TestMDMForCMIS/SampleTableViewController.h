@@ -19,5 +19,4 @@
 - (void)uploadFile;
 - (void)removeFile;
 - (void)downloadFile;
-- (void)testGDFileIO;
 @end

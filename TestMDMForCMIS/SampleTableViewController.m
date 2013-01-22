@@ -19,10 +19,13 @@
 #import <GD/GDFileSystem.h>
 #import "GDHttpUtil.h"
 #import "CMISFileUtil.h"
+#import "GDHttpUtilWithSockets.h"
 
 @interface SampleTableViewController ()
 @property (nonatomic, strong) CMISSession * session;
 @property (nonatomic, strong) CMISFolder *rootFolder;
+@property (nonatomic, strong) CMISDocument *testDoc;
+@property (nonatomic, strong) CMISRequest *request;
 @property (nonatomic, strong) NSString *testDocId;
 @property BOOL canActionCMISDoc;
 @property BOOL canRemoveCMISDoc;
@@ -42,6 +45,8 @@
 @synthesize testDocId = _testDocId;
 @synthesize canActionCMISDoc = _canActionCMISDoc;
 @synthesize canRemoveCMISDoc = _canRemoveCMISDoc;
+@synthesize testDoc = _testDoc;
+@synthesize request = _request;
 
 - (void)viewDidLoad
 {
@@ -86,9 +91,6 @@
             break;
         case 3:
             [self downloadFile];
-            break;
-        case 4:
-            [self testGDFileIO];
             break;
         default:
             break;
@@ -162,6 +164,12 @@
                 }
                 else
                 {
+                    UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Success"
+                                                                    message:@"CMIS session was created successfully and got the root folder"
+                                                                   delegate:self
+                                                          cancelButtonTitle:@"Ok"
+                                                          otherButtonTitles: nil];
+                    [alert show];
                     NSLog(@"We succeeded in getting the root folder for the session");
                     self.uploadLabel.textColor = [UIColor blackColor];
                     self.uploadCell.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
@@ -210,11 +218,23 @@
                                            completionBlock:^(NSString *objectId, NSError *error){
                                                if (nil == objectId)
                                                {
+                                                   UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Error"
+                                                                                                   message:@"Failed to upload test doc"
+                                                                                                  delegate:self
+                                                                                         cancelButtonTitle:@"Ok"
+                                                                                         otherButtonTitles: nil];
+                                                   [alert show];
                                                    NSLog(@"CMIS upload of test document failed. Error is %d with message %@", [error code], [error localizedDescription]);
                                                    self.testDocId = nil;
                                                }
                                                else
                                                {
+                                                   UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Success"
+                                                                                                   message:@"The test doc was uploaded successfully"
+                                                                                                  delegate:self
+                                                                                         cancelButtonTitle:@"Ok"
+                                                                                         otherButtonTitles: nil];
+                                                   [alert show];
                                                    NSLog(@"Upload succeeded and the object ID is %@", objectId);
                                                    self.testDocId = objectId;
                                                    self.removeCell.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
@@ -271,13 +291,42 @@
     {
         return;
     }
+    self.request = [[CMISRequest alloc] init];
     if (self.session && self.testDocId)
     {
         [self.session retrieveObject:self.testDocId completionBlock:^(CMISObject *object, NSError *error){
             if (object)
             {
-                CMISDocument *doc = (CMISDocument *)object;
-                [doc deleteAllVersionsWithCompletionBlock:^(BOOL documentDeleted, NSError *deleteError){
+                NSLog(@"SampleTableViewController::removeFile We got the document we want to delete");
+                self.testDoc = (CMISDocument *)object;
+                /*
+                [self.session.binding.objectService deleteObject:self.testDocId
+                                                     allVersions:YES
+                                                 completionBlock:^(BOOL objectDeleted, NSError *deleteError){
+                                                     if (objectDeleted)
+                                                     {
+                                                         UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Success"
+                                                                                                         message:@"The test doc was deleted successfully"
+                                                                                                        delegate:self
+                                                                                               cancelButtonTitle:@"Ok"
+                                                                                               otherButtonTitles: nil];
+                                                         [alert show];
+                                                         NSLog(@"We succeeded in deleting the object");
+                                                     }
+                                                     else
+                                                     {
+                                                         UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Error"
+                                                                                                         message:@"Failure to delete the test doc"
+                                                                                                        delegate:self
+                                                                                               cancelButtonTitle:@"Ok"
+                                                                                               otherButtonTitles: nil];
+                                                         [alert show];
+                                                         NSLog(@"Error deleting the test doc code=%d , message=%@",[deleteError code], [deleteError localizedDescription]);
+                                                         
+                                                     }
+                }];
+                 */
+                [self.testDoc deleteAllVersionsWithCompletionBlock:^(BOOL documentDeleted, NSError *deleteError){
                     if (documentDeleted)
                     {
                         UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Success"
@@ -297,6 +346,9 @@
                         [alert show];
                         NSLog(@"Error deleting the test doc code=%d , message=%@",[deleteError code], [deleteError localizedDescription]);
                     }
+                    self.removeCell.accessoryType = UITableViewCellAccessoryNone;
+                    self.removeLabel.textColor = [UIColor lightGrayColor];
+                    self.canRemoveCMISDoc = NO;
                 }];
             }
             else
@@ -337,33 +389,56 @@
             }
             else
             {
-                UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Success"
-                                                                message:@"we downloaded the file versioned-quote.txt"
-                                                               delegate:self
-                                                      cancelButtonTitle:@"Ok"
-                                                      otherButtonTitles: nil];
-                [alert show];
+                CMISDocument *serverDoc = (CMISDocument *)object;
+                NSError *writeError = nil;
+                NSString *filePath = @"versionedtext.text";
+                GDCWriteStream *outputStream = [GDFileSystem getWriteStream:filePath appendmode:NO error:&writeError];
+                [serverDoc downloadContentToOutputStream:outputStream completionBlock:^(NSError *downloadError){
+                    if (downloadError)
+                    {
+                        [outputStream close];
+                        UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Error"
+                                                                        message:@"Couldn't download content of test document"
+                                                                       delegate:self
+                                                              cancelButtonTitle:@"Ok"
+                                                              otherButtonTitles: nil];
+                        [alert show];
+
+                    }
+                    else
+                    {
+                        UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Success"
+                                                                        message:@"we downloaded the file versioned-quote.txt"
+                                                                       delegate:self
+                                                              cancelButtonTitle:@"Ok"
+                                                              otherButtonTitles: nil];
+                        [alert show];
+                        [outputStream close];
+                        GDFileStat stats;
+                        NSError *error = nil;
+                        BOOL success = [GDFileSystem getFileStat:filePath to:&stats error:&error];
+                        if (!success)
+                        {
+                            NSLog(@"Somehow we can't get the file stats to the downloaded file");
+                        }
+                        else
+                        {
+                            NSInteger offset = stats.fileLen;
+                            NSLog(@"the file size is %d", offset);
+                            NSError *readError = nil;
+                            NSData *data = [GDFileSystem readFromFile:filePath error:&readError];
+                            if (data)
+                            {
+                                NSLog(@"read in data are %@",[[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding]);
+                            }
+                        }
+                    }
+                } progressBlock:nil];
+                
             }
             
         }];
     }
-    
-}
-
-- (void)testGDFileIO
-{
-    NSString *file = [self prepareTestFileForUpload];
-    NSError *error = nil;
-    GDCReadStream *readStream = [GDFileSystem getReadStream:file error:&error];
-    if (readStream)
-    {
-        NSLog(@"We have been able to open the file for reading");
-    }
-    else
-    {
-        NSLog(@"We failed to open the file for reading. Error code %d and message %@", [error code], [error localizedDescription]);
-    }
-    [readStream close];
     
 }
 

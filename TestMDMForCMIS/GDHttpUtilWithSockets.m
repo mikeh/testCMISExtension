@@ -17,6 +17,7 @@
 #import "CMISNetworkProvider.h"
 
 @interface GDHttpUtilWithSockets ()
+@property (nonatomic, strong) NSString *urlString;
 @property (nonatomic, strong) NSData *requestBody;
 @property (nonatomic, strong) NSData *uploadData;
 @property (nonatomic, strong) NSMutableData *receivedData;
@@ -29,6 +30,10 @@
 @property (nonatomic, strong) GDCWriteStream * outputStream;
 @property (nonatomic, strong) GDCReadStream * inputStream;
 + (NSString *)httpMethodString:(CMISHttpRequestMethod) requestMethod;
+
+- (void)prepareWithURLString:(NSString *)urlString;
+- (void)prepareWithURLString:(NSString *)urlString port:(NSUInteger)port isSSL:(BOOL)isSSL;
+
 - (void)prepareConnectionWithURL:(NSURL *)url
                          session:(CMISBindingSession *)session
                           method:(NSString *)httpMethod
@@ -39,7 +44,7 @@
                    bytesExpected:(unsigned long long)expected
                  completionBlock:(void (^)(CMISHttpResponse *httpResponse, NSError *error))completionBlock
                    progressBlock:(void (^)(unsigned long long bytesDownloaded, unsigned long long bytesTotal))progressBlock;
-- (void)prepareHeaders;
+- (NSString *)preparedHeaders;
 - (NSData *)dataFromInput;
 - (void)readFromBuffer:(GDDirectByteBuffer *)buffer;
 @end
@@ -57,23 +62,37 @@
 @synthesize bytesExpected = _bytesExpected;
 @synthesize progressBlock = _progressBlock;
 @synthesize uploadData = _uploadData;
+@synthesize urlString = _urlString;
 
 #pragma custom initialisers
-- (id)initWithURLString:(NSString *)urlString
+- (void)prepareWithURLString:(NSString *)urlString
 {
-    return [self initWithURLString:urlString port:443 isSSL:YES];
+    [self prepareWithURLString:urlString port:443 isSSL:YES];
 }
 
 
-- (id)initWithURLString:(NSString *)urlString port:(NSUInteger)port isSSL:(BOOL)isSSL
+- (void)prepareWithURLString:(NSString *)urlString port:(NSUInteger)port isSSL:(BOOL)isSSL
 {
-    self = [super init];
-    if (nil != self)
+    NSString *httpSeparator = @"http://";
+    if ([urlString hasPrefix:@"https://"])
     {
-        self.socket = [[GDSocket alloc] init:[urlString UTF8String] onPort:port andUseSSL:isSSL];
-        self.socket.delegate = self;
+        httpSeparator = @"https://";
     }
-    return self;
+    NSArray *hostComponents = [self.urlString componentsSeparatedByString:httpSeparator];
+    if (hostComponents.count <= 1)
+    {
+        return;
+    }
+    NSString *bareUrl = (NSString *)[hostComponents objectAtIndex:1];
+    NSArray *restComponents = [bareUrl componentsSeparatedByString:@"/alfresco"];
+    if (restComponents.count <= 1)
+    {
+        return;
+    }
+    NSString *host = [restComponents objectAtIndex:0];
+    NSLog(@"the bare URL is %@", host);
+    self.socket = [[GDSocket alloc] init:[host UTF8String] onPort:port andUseSSL:isSSL];
+    self.socket.delegate = self;
 }
 
 #pragma custom cancel method needed for CMISRequest
@@ -96,7 +115,23 @@
                 headers:(NSDictionary *)additionalHeaders
         completionBlock:(void (^)(CMISHttpResponse *httpResponse, NSError *error))completionBlock
 {
-    return nil;
+    [self prepareConnectionWithURL:url
+                           session:session
+                            method:[GDHttpUtilWithSockets httpMethodString:httpRequestMethod]
+                              body:body
+                           headers:additionalHeaders
+                       inputStream:nil
+                      outputStream:nil
+                     bytesExpected:0
+                   completionBlock:completionBlock
+                     progressBlock:nil];
+    
+    NSString *urlString = [url absoluteString];
+    [self prepareWithURLString:urlString port:80 isSSL:NO];
+    CMISRequest *cancelRequest = [[CMISRequest alloc] init];
+    cancelRequest.httpRequest = self;
+    [self.socket connect];
+    return cancelRequest;
 }
 
 - (CMISRequest *)invoke:(NSURL *)url
@@ -106,7 +141,24 @@
                 headers:(NSDictionary *)additionalHeaders
         completionBlock:(void (^)(CMISHttpResponse *httpResponse, NSError *error))completionBlock
 {
-    return nil;
+    
+    [self prepareConnectionWithURL:url
+                           session:session
+                            method:[GDHttpUtilWithSockets httpMethodString:httpRequestMethod]
+                              body:nil
+                           headers:additionalHeaders
+                       inputStream:(GDCReadStream *)inputStream
+                      outputStream:nil
+                     bytesExpected:0
+                   completionBlock:completionBlock
+                     progressBlock:nil];
+    
+    NSString *urlString = [url absoluteString];
+    [self prepareWithURLString:urlString port:80 isSSL:NO];
+    CMISRequest *cancelRequest = [[CMISRequest alloc] init];
+    cancelRequest.httpRequest = self;
+    [self.socket connect];
+    return cancelRequest;
 }
 
 
@@ -120,6 +172,20 @@ completionBlock:(void (^)(CMISHttpResponse *httpResponse, NSError *error))comple
  progressBlock:(void (^)(unsigned long long bytesDownloaded, unsigned long long bytesTotal))progressBlock
  requestObject:(CMISRequest *)requestObject
 {
+    [self prepareConnectionWithURL:url
+                           session:session
+                            method:[GDHttpUtilWithSockets httpMethodString:httpRequestMethod]
+                              body:nil
+                           headers:additionalHeaders
+                       inputStream:(GDCReadStream *)inputStream
+                      outputStream:nil
+                     bytesExpected:bytesExpected
+                   completionBlock:completionBlock
+                     progressBlock:progressBlock];
+    requestObject.httpRequest = self;
+    NSString *urlString = [url absoluteString];
+    [self prepareWithURLString:urlString port:80 isSSL:NO];
+    [self.socket connect];
     
 }
 
@@ -133,6 +199,20 @@ completionBlock:(void (^)(CMISHttpResponse *httpResponse, NSError *error))comple
  progressBlock:(void (^)(unsigned long long bytesDownloaded, unsigned long long bytesTotal))progressBlock
  requestObject:(CMISRequest*)requestObject
 {
+    [self prepareConnectionWithURL:url
+                           session:session
+                            method:[GDHttpUtilWithSockets httpMethodString:httpRequestMethod]
+                              body:nil
+                           headers:nil
+                       inputStream:nil
+                      outputStream:(GDCWriteStream *)outputStream
+                     bytesExpected:bytesExpected
+                   completionBlock:completionBlock
+                     progressBlock:progressBlock];
+    requestObject.httpRequest = self;
+    NSString *urlString = [url absoluteString];
+    [self prepareWithURLString:urlString port:80 isSSL:NO];
+    [self.socket connect];
     
 }
 
@@ -193,29 +273,86 @@ completionBlock:(void (^)(CMISHttpResponse *httpResponse, NSError *error))comple
 #pragma GDSocketDelegate methods
 - (void)onClose:(id)socket
 {
+    NSLog(@"Closing connection");
     
 }
 
-- (void)onErr:(int)error inSocket:(id)socket
+- (void)onErr:(int)error inSocket:(GDSocket *)socket
 {
-    
+    NSLog(@"An error occurred with code %d", error);
 }
 
-- (void)onOpen:(id)socket
+- (void)onOpen:(GDSocket *)socket
 {
+    NSLog(@"onOpen method");
+    NSString *httpRequestHeader = [self preparedHeaders];
+    NSLog(@"the http request header is:");
+    NSLog(@"%@",httpRequestHeader);
     
+    self.receivedData = [NSMutableData data];
+    [socket.writeStream write:[httpRequestHeader UTF8String]];
+    [socket write];
+    NSLog(@"onOpen method - LEAVING");
 }
 
-- (void)onRead:(id)socket
+- (void)onRead:(GDSocket *)socket
 {
-    
+    NSData *received = [socket.readStream unreadData];
+    [self.receivedData appendData:received];
+    NSString *receivedByteString = [[NSString alloc] initWithData:received encoding:NSUTF8StringEncoding];
+    NSLog(@"received string is %@",receivedByteString);
+    [socket disconnect];
 }
 
 #pragma private methods
 
-- (void)prepareHeaders
+- (NSString *)preparedHeaders;
 {
+    if (!self.urlString)
+    {
+        return nil;
+    }
+    /*
+     */
+    NSString *httpSeparator = @"http://";
+    if ([self.urlString hasPrefix:@"https://"])
+    {
+        httpSeparator = @"https://";
+    }
+    NSArray *hostComponents = [self.urlString componentsSeparatedByString:httpSeparator];
+    if (hostComponents.count <= 1)
+    {
+        return nil;
+    }
+    NSString *bareUrl = [hostComponents objectAtIndex:1];
+    NSArray *restComponents = [bareUrl componentsSeparatedByString:@"/alfresco"];
+    if (restComponents.count <= 1)
+    {
+        return nil;
+    }
+    NSString *host = [NSString stringWithFormat:@"%@",[restComponents objectAtIndex:0]];
+//    NSMutableString *apiString = [NSMutableString string];
+    NSMutableString *apiString = [NSMutableString stringWithString:@"/alfresco"];
+    for (int index = 1; index < restComponents.count; index++)
+    {
+        [apiString appendString:[restComponents objectAtIndex:index]];
+    }
+    NSMutableString *requestHeader = [NSMutableString string];
     
+    [requestHeader appendString:[NSString stringWithFormat:@"%@ %@ HTTP/1.1 \n",self.requestMethod, apiString]];
+    [requestHeader appendString:[NSString stringWithFormat:@"Host: %@\n",host]];
+    [self.authenticationHeader enumerateKeysAndObjectsUsingBlock:^(NSString *key, NSString *value, BOOL *stop){
+        [requestHeader appendString:[NSString stringWithFormat:@"%@: %@\n", key, value]];
+    }];
+    if (self.headers)
+    {
+        [self.headers enumerateKeysAndObjectsUsingBlock:^(NSString *headerName, NSString *header, BOOL *stop) {
+            [requestHeader appendString:[NSString stringWithFormat:@"%@: %@\n", headerName, header]];
+        }];
+    }
+
+    
+    return (NSString *)requestHeader;
 }
 
 
@@ -230,6 +367,18 @@ completionBlock:(void (^)(CMISHttpResponse *httpResponse, NSError *error))comple
                  completionBlock:(void (^)(CMISHttpResponse *httpResponse, NSError *error))completionBlock
                    progressBlock:(void (^)(unsigned long long bytesDownloaded, unsigned long long bytesTotal))progressBlock
 {
+    self.urlString = [url absoluteString];
+    self.requestBody = body;
+    self.requestMethod = httpMethod;
+    self.headers = headers;
+    self.inputStream = inputStream;
+    self.outputStream = outputStream;
+    self.bytesExpected = expected;
+    self.completionBlock = completionBlock;
+    self.progressBlock = progressBlock;
+    id <CMISAuthenticationProvider> authenticationProvider = session.authenticationProvider;
+    self.authenticationHeader = [NSDictionary dictionaryWithDictionary:authenticationProvider.httpHeadersToApply];
+        
     
 }
 

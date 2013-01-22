@@ -26,6 +26,7 @@ typedef enum {
 
 @protocol CMISHttpInvokerDelegate <NSObject>
 
+
 - (CMISRequest *)invoke:(NSURL *)url
          withHttpMethod:(CMISHttpRequestMethod)httpRequestMethod
             withSession:(CMISBindingSession *)session
@@ -82,5 +83,6 @@ completionBlock:(void (^)(CMISHttpResponse *httpResponse, NSError *error))comple
 - (CMISRequest *)invokeDELETE:(NSURL *)url
                   withSession:(CMISBindingSession *)session
               completionBlock:(void (^)(CMISHttpResponse *httpResponse, NSError *error))completionBlock;
+
 
 @end
