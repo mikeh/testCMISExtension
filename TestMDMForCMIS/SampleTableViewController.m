@@ -393,6 +393,8 @@
                 NSError *writeError = nil;
                 NSString *filePath = @"versionedtext.text";
                 GDCWriteStream *outputStream = [GDFileSystem getWriteStream:filePath appendmode:NO error:&writeError];
+                NSStreamStatus status = outputStream.streamStatus;
+                NSLog(@"stream status is %d", status);
                 [serverDoc downloadContentToOutputStream:outputStream completionBlock:^(NSError *downloadError){
                     if (downloadError)
                     {

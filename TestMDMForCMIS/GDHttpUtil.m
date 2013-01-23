@@ -15,6 +15,7 @@
 #import "CMISRequest.h"
 #import "CMISSessionParameters.h"
 #import "CMISNetworkProvider.h"
+#import "CMISHttpRequestListDelegate.h"
 
 @interface GDHttpUtil ()
 @property (nonatomic, strong) NSData *requestBody;
@@ -63,6 +64,7 @@
 @synthesize bytesExpected = _bytesExpected;
 @synthesize progressBlock = _progressBlock;
 @synthesize uploadData = _uploadData;
+@synthesize httpListDelegate = _httpListDelegate;
 
 - (id)init
 {
@@ -75,6 +77,14 @@
     return self;
 }
 
+- (void)setHttpListDelegate:(id<CMISHttpRequestListDelegate>)httpListDelegate
+{
+    _httpListDelegate = httpListDelegate;
+    if ([_httpListDelegate respondsToSelector:@selector(addRequest:)])
+    {
+        [_httpListDelegate addRequest:self];
+    }
+}
 
 - (void)onStatusChange:(GDHttpRequest *)request
 {
@@ -119,12 +129,7 @@
             int statusCode = [request getStatus];
             const char * messageText = [request getStatusText];
             NSString *message = [[NSString alloc] initWithUTF8String:messageText];
-            GDDirectByteBuffer *buffer = [request getReceiveBuffer];
-            int bytesAvailable = buffer.bytesUnread;
-            if (0 < bytesAvailable)
-            {
-                [self readFromBuffer:buffer];
-            }
+            [self readFromBuffer:[request getReceiveBuffer]];
             if (200 <= statusCode && 299 >= statusCode)
             {
                 NSLog(@"The HTTP request returns with HTTP ok status code %d",statusCode);
@@ -144,6 +149,10 @@
             }
             self.completionBlock = nil;
             [request close];
+            if ([self.httpListDelegate respondsToSelector:@selector(removeRequest:)])
+            {
+                [self.httpListDelegate removeRequest:self];
+            }
             break;
         }
         case GDHttpRequest_HEADERS_RECEIVED:
@@ -159,8 +168,7 @@
         }
         case GDHttpRequest_LOADING:
         {
-            GDDirectByteBuffer *buffer = [request getReceiveBuffer];
-            [self readFromBuffer:buffer];
+            [self readFromBuffer:[request getReceiveBuffer]];
             break;
         }
         case GDHttpRequest_SENT:
@@ -184,14 +192,13 @@
 }
 
 
-- (CMISRequest *)invoke:(NSURL *)url
+- (void)invoke:(NSURL *)url
          withHttpMethod:(CMISHttpRequestMethod)httpRequestMethod
             withSession:(CMISBindingSession *)session
                    body:(NSData *)body
                 headers:(NSDictionary *)additionalHeaders
         completionBlock:(void (^)(CMISHttpResponse *httpResponse, NSError *error))completionBlock
 {
-    CMISRequest *cancelRequest = [[CMISRequest alloc] init];
     [self prepareConnectionWithURL:url
                            session:session
                             method:[GDHttpUtil httpMethodString:httpRequestMethod]
@@ -203,19 +210,15 @@
                    completionBlock:completionBlock
                      progressBlock:nil];
     
-    cancelRequest.httpRequest = self;
-    return cancelRequest;
 }
 
-- (CMISRequest *)invoke:(NSURL *)url
+- (void)invoke:(NSURL *)url
          withHttpMethod:(CMISHttpRequestMethod)httpRequestMethod
             withSession:(CMISBindingSession *)session
             inputStream:(NSInputStream *)inputStream
                 headers:(NSDictionary *)additionalHeaders
         completionBlock:(void (^)(CMISHttpResponse *httpResponse, NSError *error))completionBlock
 {
-    CMISRequest *cancelRequest = [[CMISRequest alloc] init];
-
     [self prepareConnectionWithURL:url
                            session:session
                             method:[GDHttpUtil httpMethodString:httpRequestMethod]
@@ -227,8 +230,6 @@
                    completionBlock:completionBlock
                      progressBlock:nil];
         
-    cancelRequest.httpRequest = self;
-    return cancelRequest;
 }
 
 
@@ -279,7 +280,7 @@ completionBlock:(void (^)(CMISHttpResponse *httpResponse, NSError *error))comple
 
 
 
-- (CMISRequest *)invokeGET:(NSURL *)url
+- (void)invokeGET:(NSURL *)url
                withSession:(CMISBindingSession *)session
            completionBlock:(void (^)(CMISHttpResponse *httpResponse, NSError *error))completionBlock
 {
@@ -291,7 +292,7 @@ completionBlock:(void (^)(CMISHttpResponse *httpResponse, NSError *error))comple
         completionBlock:completionBlock];
 }
 
-- (CMISRequest *)invokePOST:(NSURL *)url
+- (void)invokePOST:(NSURL *)url
                 withSession:(CMISBindingSession *)session
                        body:(NSData *)body
                     headers:(NSDictionary *)additionalHeaders
@@ -305,7 +306,7 @@ completionBlock:(void (^)(CMISHttpResponse *httpResponse, NSError *error))comple
         completionBlock:completionBlock];
 }
 
-- (CMISRequest *)invokePUT:(NSURL *)url
+- (void)invokePUT:(NSURL *)url
                withSession:(CMISBindingSession *)session
                       body:(NSData *)body
                    headers:(NSDictionary *)additionalHeaders
@@ -319,7 +320,7 @@ completionBlock:(void (^)(CMISHttpResponse *httpResponse, NSError *error))comple
         completionBlock:completionBlock];
 }
 
-- (CMISRequest *)invokeDELETE:(NSURL *)url
+- (void)invokeDELETE:(NSURL *)url
                   withSession:(CMISBindingSession *)session
               completionBlock:(void (^)(CMISHttpResponse *httpResponse, NSError *error))completionBlock
 {
@@ -431,6 +432,10 @@ completionBlock:(void (^)(CMISHttpResponse *httpResponse, NSError *error))comple
 
 - (void)readFromBuffer:(GDDirectByteBuffer *)buffer
 {
+    if (buffer.bytesUnread == 0)
+    {
+        return;
+    }
     if (self.outputStream)
     {
         NSData *received = [buffer unreadData];

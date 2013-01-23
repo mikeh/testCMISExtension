@@ -14,6 +14,7 @@
 
 #import <Foundation/Foundation.h>
 #import "AlfrescoFileManagerDelegate.h"
+//#import "CMISFileManager.h"
 
 @interface FileUtil : NSObject <AlfrescoFileManagerDelegate>
 

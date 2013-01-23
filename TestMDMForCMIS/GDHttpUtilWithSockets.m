@@ -63,7 +63,7 @@
 @synthesize progressBlock = _progressBlock;
 @synthesize uploadData = _uploadData;
 @synthesize urlString = _urlString;
-
+@synthesize httpListDelegate = _httpListDelegate;
 #pragma custom initialisers
 - (void)prepareWithURLString:(NSString *)urlString
 {
@@ -108,7 +108,7 @@
 
 #pragma CMISHttpInvokerDelegate methods
 
-- (CMISRequest *)invoke:(NSURL *)url
+- (void)invoke:(NSURL *)url
          withHttpMethod:(CMISHttpRequestMethod)httpRequestMethod
             withSession:(CMISBindingSession *)session
                    body:(NSData *)body
@@ -128,13 +128,10 @@
     
     NSString *urlString = [url absoluteString];
     [self prepareWithURLString:urlString port:80 isSSL:NO];
-    CMISRequest *cancelRequest = [[CMISRequest alloc] init];
-    cancelRequest.httpRequest = self;
     [self.socket connect];
-    return cancelRequest;
 }
 
-- (CMISRequest *)invoke:(NSURL *)url
+- (void)invoke:(NSURL *)url
          withHttpMethod:(CMISHttpRequestMethod)httpRequestMethod
             withSession:(CMISBindingSession *)session
             inputStream:(NSInputStream *)inputStream
@@ -155,10 +152,7 @@
     
     NSString *urlString = [url absoluteString];
     [self prepareWithURLString:urlString port:80 isSSL:NO];
-    CMISRequest *cancelRequest = [[CMISRequest alloc] init];
-    cancelRequest.httpRequest = self;
     [self.socket connect];
-    return cancelRequest;
 }
 
 
@@ -218,7 +212,7 @@ completionBlock:(void (^)(CMISHttpResponse *httpResponse, NSError *error))comple
 
 
 
-- (CMISRequest *)invokeGET:(NSURL *)url
+- (void)invokeGET:(NSURL *)url
                withSession:(CMISBindingSession *)session
            completionBlock:(void (^)(CMISHttpResponse *httpResponse, NSError *error))completionBlock
 {
@@ -230,7 +224,7 @@ completionBlock:(void (^)(CMISHttpResponse *httpResponse, NSError *error))comple
         completionBlock:completionBlock];
 }
 
-- (CMISRequest *)invokePOST:(NSURL *)url
+- (void)invokePOST:(NSURL *)url
                 withSession:(CMISBindingSession *)session
                        body:(NSData *)body
                     headers:(NSDictionary *)additionalHeaders
@@ -244,7 +238,7 @@ completionBlock:(void (^)(CMISHttpResponse *httpResponse, NSError *error))comple
         completionBlock:completionBlock];
 }
 
-- (CMISRequest *)invokePUT:(NSURL *)url
+- (void)invokePUT:(NSURL *)url
                withSession:(CMISBindingSession *)session
                       body:(NSData *)body
                    headers:(NSDictionary *)additionalHeaders
@@ -258,7 +252,7 @@ completionBlock:(void (^)(CMISHttpResponse *httpResponse, NSError *error))comple
         completionBlock:completionBlock];
 }
 
-- (CMISRequest *)invokeDELETE:(NSURL *)url
+- (void)invokeDELETE:(NSURL *)url
                   withSession:(CMISBindingSession *)session
               completionBlock:(void (^)(CMISHttpResponse *httpResponse, NSError *error))completionBlock
 {

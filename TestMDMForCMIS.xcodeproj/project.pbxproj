@@ -153,6 +153,9 @@
 		4E38805D169D84AA004BB186 /* SampleTableViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SampleTableViewController.m; sourceTree = "<group>"; };
 		4E38806C169DD0F8004BB186 /* GDHttpUtil.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GDHttpUtil.h; sourceTree = "<group>"; };
 		4E38806D169DD0F8004BB186 /* GDHttpUtil.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GDHttpUtil.m; sourceTree = "<group>"; };
+		4E3E14A616AFDDB40057CE22 /* CMISHttpRequestListDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CMISHttpRequestListDelegate.h; sourceTree = "<group>"; };
+		4E3E14CA16B047770057CE22 /* CMISFileManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CMISFileManager.h; sourceTree = "<group>"; };
+		4E3E14CB16B047770057CE22 /* CMISPlaceholderFileManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CMISPlaceholderFileManager.h; sourceTree = "<group>"; };
 		4E96A56E16831AEB001AABEB /* test_file.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = test_file.txt; sourceTree = "<group>"; };
 		4E96A57116831EF5001AABEB /* TestFileManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TestFileManager.h; sourceTree = "<group>"; };
 		4E96A57216831EF5001AABEB /* TestFileManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TestFileManager.m; sourceTree = "<group>"; };
@@ -273,6 +276,9 @@
 		4E0076FF1681BA7700908DE9 /* CMIS */ = {
 			isa = PBXGroup;
 			children = (
+				4E3E14CA16B047770057CE22 /* CMISFileManager.h */,
+				4E3E14CB16B047770057CE22 /* CMISPlaceholderFileManager.h */,
+				4E3E14A616AFDDB40057CE22 /* CMISHttpRequestListDelegate.h */,
 				4EE3B19516A0547900A29E25 /* CMISHttpInvokerDelegate.h */,
 				4EE3B19416A0545F00A29E25 /* AlfrescoFileManagerDelegate.h */,
 				4E0077001681BA9800908DE9 /* CMISAclService.h */,
