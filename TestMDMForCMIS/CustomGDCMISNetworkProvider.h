@@ -20,7 +20,7 @@
 
 #import <Foundation/Foundation.h>
 #import "CMISNetworkProvider.h"
-#import "AlfrescoGDHttpRequest.h"
+#import "CustomGDCMISHttpRequest.h"
 
-@interface AlfrescoGDNetworkProvider : NSObject <CMISNetworkProvider>
+@interface CustomGDCMISNetworkProvider : NSObject <CMISNetworkProvider>
 @end

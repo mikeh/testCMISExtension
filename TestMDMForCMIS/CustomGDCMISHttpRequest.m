@@ -18,9 +18,9 @@
  *****************************************************************************
  */
 
-#import "AlfrescoGDHttpRequest.h"
+#import "CustomGDCMISHttpRequest.h"
 
-@interface AlfrescoGDHttpRequest ()
+@interface CustomGDCMISHttpRequest ()
 @property (nonatomic, strong) NSData *requestBody;
 @property (nonatomic, strong) NSData *uploadData;
 @property (nonatomic, strong) NSMutableData *receivedData;
@@ -32,17 +32,17 @@
 @property (nonatomic, assign) unsigned long long bytesExpected;
 @property (nonatomic, strong) GDCWriteStream * outputStream;
 @property (nonatomic, strong) GDCReadStream * inputStream;
-- (void)onOpened:(AlfrescoGDHttpRequest *)currentHttpRequest;
-- (void)onHeaderReceived:(AlfrescoGDHttpRequest *)currentHttpRequest;
-- (void)onDone:(AlfrescoGDHttpRequest *)currentHttpRequest;
-- (void)prepareRequestHeadersForRequest:(AlfrescoGDHttpRequest *)request;
+- (void)onOpened:(CustomGDCMISHttpRequest *)currentHttpRequest;
+- (void)onHeaderReceived:(CustomGDCMISHttpRequest *)currentHttpRequest;
+- (void)onDone:(CustomGDCMISHttpRequest *)currentHttpRequest;
+- (void)prepareRequestHeadersForRequest:(CustomGDCMISHttpRequest *)request;
 - (NSData *)dataFromInput;
 - (void)readFromBuffer:(GDDirectByteBuffer *)buffer;
 
 @end
 
 
-@implementation AlfrescoGDHttpRequest
+@implementation CustomGDCMISHttpRequest
 @synthesize strongHttpRequestDelegate = _strongHttpRequestDelegate;
 @synthesize requestMethod = _requestMethod;
 @synthesize requestBody = _requestBody;
@@ -62,7 +62,7 @@
     if (self != nil)
     {
         [self setDelegate:self];
-//        self.strongHttpRequestDelegate = self;
+        //        self.strongHttpRequestDelegate = self;
     }
     return self;
 }
@@ -74,7 +74,7 @@
     _strongHttpRequestDelegate = [super delegate];
 }
 
-- (void)onStatusChange:(AlfrescoGDHttpRequest *)currentHttpRequest
+- (void)onStatusChange:(CustomGDCMISHttpRequest *)currentHttpRequest
 {
     NSLog(@"ENTERING onStatusChange");
     GDHttpRequest_state_t requestState = [currentHttpRequest getState];
@@ -115,7 +115,7 @@
     
 }
 
-- (void)onOpened:(AlfrescoGDHttpRequest *)currentHttpRequest
+- (void)onOpened:(CustomGDCMISHttpRequest *)currentHttpRequest
 {
     [self prepareRequestHeadersForRequest:currentHttpRequest];
     
@@ -143,7 +143,7 @@
     NSLog(@"onOpened: the send was %@", ((sendSuccess) ? @"successful" : @"unsuccessful") );
 }
 
-- (void)onHeaderReceived:(AlfrescoGDHttpRequest *)currentHttpRequest
+- (void)onHeaderReceived:(CustomGDCMISHttpRequest *)currentHttpRequest
 {
     NSLog(@"onHeaderReceived");
     if (!self.outputStream)
@@ -154,7 +154,7 @@
 }
 
 
-- (void)onDone:(AlfrescoGDHttpRequest *)currentHttpRequest
+- (void)onDone:(CustomGDCMISHttpRequest *)currentHttpRequest
 {
     NSLog(@"onDone");
     int statusCode = [currentHttpRequest getStatus];
@@ -187,7 +187,7 @@
 
 - (void)cancel
 {
-    [self abort];    
+    [self abort];
 }
 
 - (BOOL)prepareConnectionWithURL:(NSURL *)url
@@ -218,7 +218,7 @@
 
 
 
-- (void)prepareRequestHeadersForRequest:(AlfrescoGDHttpRequest *)request
+- (void)prepareRequestHeadersForRequest:(CustomGDCMISHttpRequest *)request
 {
     [self.authenticationHeader enumerateKeysAndObjectsUsingBlock:^(NSString *key, NSString *value, BOOL *stop){
         [request setRequestHeader:[key UTF8String] withValue:[value UTF8String]];

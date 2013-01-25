@@ -30,11 +30,11 @@
 		4E0077681682239500908DE9 /* env-cfg.plist in Resources */ = {isa = PBXBuildFile; fileRef = 4E0077671682239500908DE9 /* env-cfg.plist */; };
 		4E0E13751684703D00AF36AB /* GDCCustomReadStream.m in Sources */ = {isa = PBXBuildFile; fileRef = 4E0E13741684703D00AF36AB /* GDCCustomReadStream.m */; };
 		4E38805E169D84AA004BB186 /* SampleTableViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 4E38805D169D84AA004BB186 /* SampleTableViewController.m */; };
-		4E73098116B192BB0055A629 /* AlfrescoGDHttpRequest.m in Sources */ = {isa = PBXBuildFile; fileRef = 4E73098016B192BB0055A629 /* AlfrescoGDHttpRequest.m */; };
 		4E96A57316831EF5001AABEB /* TestFileManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 4E96A57216831EF5001AABEB /* TestFileManager.m */; };
 		4E96A57F16835319001AABEB /* GDCWriteStream+OutputStream.m in Sources */ = {isa = PBXBuildFile; fileRef = 4E96A57E16835318001AABEB /* GDCWriteStream+OutputStream.m */; };
 		4EB9893316838297007C42E4 /* test_file.txt in Resources */ = {isa = PBXBuildFile; fileRef = 4E96A56E16831AEB001AABEB /* test_file.txt */; };
-		4EED47B316B2799900A0BAAC /* AlfrescoGDNetworkProvider.m in Sources */ = {isa = PBXBuildFile; fileRef = 4EED47B216B2799900A0BAAC /* AlfrescoGDNetworkProvider.m */; };
+		4EED485716B2DAAF00A0BAAC /* CustomGDCMISNetworkProvider.m in Sources */ = {isa = PBXBuildFile; fileRef = 4EED485616B2DAAF00A0BAAC /* CustomGDCMISNetworkProvider.m */; };
+		4EED485B16B2DACB00A0BAAC /* CustomGDCMISHttpRequest.m in Sources */ = {isa = PBXBuildFile; fileRef = 4EED485A16B2DACB00A0BAAC /* CustomGDCMISHttpRequest.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -152,8 +152,6 @@
 		4E38805D169D84AA004BB186 /* SampleTableViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SampleTableViewController.m; sourceTree = "<group>"; };
 		4E3E14CA16B047770057CE22 /* CMISFileManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CMISFileManager.h; sourceTree = "<group>"; };
 		4E3E14CB16B047770057CE22 /* CMISPlaceholderFileManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CMISPlaceholderFileManager.h; sourceTree = "<group>"; };
-		4E73097F16B192BB0055A629 /* AlfrescoGDHttpRequest.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AlfrescoGDHttpRequest.h; sourceTree = "<group>"; };
-		4E73098016B192BB0055A629 /* AlfrescoGDHttpRequest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AlfrescoGDHttpRequest.m; sourceTree = "<group>"; };
 		4E96A56E16831AEB001AABEB /* test_file.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = test_file.txt; sourceTree = "<group>"; };
 		4E96A57116831EF5001AABEB /* TestFileManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TestFileManager.h; sourceTree = "<group>"; };
 		4E96A57216831EF5001AABEB /* TestFileManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TestFileManager.m; sourceTree = "<group>"; };
@@ -161,8 +159,10 @@
 		4E96A57E16835318001AABEB /* GDCWriteStream+OutputStream.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "GDCWriteStream+OutputStream.m"; sourceTree = "<group>"; };
 		4EE3B19416A0545F00A29E25 /* AlfrescoFileManagerDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AlfrescoFileManagerDelegate.h; sourceTree = "<group>"; };
 		4EED47B016B2789700A0BAAC /* CMISDefaultNetworkProvider.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CMISDefaultNetworkProvider.h; sourceTree = "<group>"; };
-		4EED47B116B2799900A0BAAC /* AlfrescoGDNetworkProvider.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AlfrescoGDNetworkProvider.h; sourceTree = "<group>"; };
-		4EED47B216B2799900A0BAAC /* AlfrescoGDNetworkProvider.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AlfrescoGDNetworkProvider.m; sourceTree = "<group>"; };
+		4EED485516B2DAAF00A0BAAC /* CustomGDCMISNetworkProvider.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CustomGDCMISNetworkProvider.h; sourceTree = "<group>"; };
+		4EED485616B2DAAF00A0BAAC /* CustomGDCMISNetworkProvider.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CustomGDCMISNetworkProvider.m; sourceTree = "<group>"; };
+		4EED485916B2DACB00A0BAAC /* CustomGDCMISHttpRequest.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CustomGDCMISHttpRequest.h; sourceTree = "<group>"; };
+		4EED485A16B2DACB00A0BAAC /* CustomGDCMISHttpRequest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CustomGDCMISHttpRequest.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -238,10 +238,10 @@
 				4E0E13741684703D00AF36AB /* GDCCustomReadStream.m */,
 				4E38805C169D84AA004BB186 /* SampleTableViewController.h */,
 				4E38805D169D84AA004BB186 /* SampleTableViewController.m */,
-				4E73097F16B192BB0055A629 /* AlfrescoGDHttpRequest.h */,
-				4E73098016B192BB0055A629 /* AlfrescoGDHttpRequest.m */,
-				4EED47B116B2799900A0BAAC /* AlfrescoGDNetworkProvider.h */,
-				4EED47B216B2799900A0BAAC /* AlfrescoGDNetworkProvider.m */,
+				4EED485516B2DAAF00A0BAAC /* CustomGDCMISNetworkProvider.h */,
+				4EED485616B2DAAF00A0BAAC /* CustomGDCMISNetworkProvider.m */,
+				4EED485916B2DACB00A0BAAC /* CustomGDCMISHttpRequest.h */,
+				4EED485A16B2DACB00A0BAAC /* CustomGDCMISHttpRequest.m */,
 			);
 			path = TestMDMForCMIS;
 			sourceTree = "<group>";
@@ -442,8 +442,8 @@
 				4E96A57F16835319001AABEB /* GDCWriteStream+OutputStream.m in Sources */,
 				4E0E13751684703D00AF36AB /* GDCCustomReadStream.m in Sources */,
 				4E38805E169D84AA004BB186 /* SampleTableViewController.m in Sources */,
-				4E73098116B192BB0055A629 /* AlfrescoGDHttpRequest.m in Sources */,
-				4EED47B316B2799900A0BAAC /* AlfrescoGDNetworkProvider.m in Sources */,
+				4EED485716B2DAAF00A0BAAC /* CustomGDCMISNetworkProvider.m in Sources */,
+				4EED485B16B2DACB00A0BAAC /* CustomGDCMISHttpRequest.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

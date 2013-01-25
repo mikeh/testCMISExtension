@@ -30,7 +30,7 @@
 #import "CMISConstants.h"
 #import <GD/GDFileSystem.h>
 #import "CMISFileUtil.h"
-#import "AlfrescoGDNetworkProvider.h"
+#import "CustomGDCMISNetworkProvider.h"
 
 @interface SampleTableViewController ()
 @property (nonatomic, strong) CMISSession * session;
@@ -140,7 +140,7 @@
     /**
      Network IO setting. We need to provide the HTTP invoker here
      */
-    AlfrescoGDNetworkProvider *networkProvider = [[AlfrescoGDNetworkProvider alloc] init];
+    CustomGDCMISNetworkProvider *networkProvider = [[CustomGDCMISNetworkProvider alloc] init];
     parameters.networkProvider = networkProvider;
 
     /*

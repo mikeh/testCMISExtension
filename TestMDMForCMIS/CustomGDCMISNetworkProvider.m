@@ -18,7 +18,7 @@
  *****************************************************************************
  */
 
-#import "AlfrescoGDNetworkProvider.h"
+#import "CustomGDCMISNetworkProvider.h"
 #import "CMISAuthenticationProvider.h"
 #import "CMISErrors.h"
 #import "CMISHttpResponse.h"
@@ -28,11 +28,11 @@
 #import "CMISRequest.h"
 #import "CMISSessionParameters.h"
 
-@interface AlfrescoGDNetworkProvider ()
+@interface CustomGDCMISNetworkProvider ()
 + (NSString *)httpMethodString:(CMISHttpRequestMethod) requestMethod;
 @end
 
-@implementation AlfrescoGDNetworkProvider
+@implementation CustomGDCMISNetworkProvider
 
 #pragma CMISNetworkProvider invoker methods
 
@@ -44,17 +44,17 @@ withHttpMethod:(CMISHttpRequestMethod)httpRequestMethod
        headers:(NSDictionary *)additionalHeaders
 completionBlock:(void (^)(CMISHttpResponse *httpResponse, NSError *error))completionBlock
 {
-    AlfrescoGDHttpRequest *requestHandler = [[AlfrescoGDHttpRequest alloc] init];
-    BOOL success = [requestHandler prepareConnectionWithURL:url
-                                          session:session
-                                           method:[AlfrescoGDNetworkProvider httpMethodString:httpRequestMethod]
-                                             body:body
-                                          headers:additionalHeaders
-                                      inputStream:nil
-                                     outputStream:nil
-                                    bytesExpected:0
-                                  completionBlock:completionBlock
-                                    progressBlock:nil];
+    CustomGDCMISHttpRequest *request = [[CustomGDCMISHttpRequest alloc] init];
+    BOOL success = [request prepareConnectionWithURL:url
+                                                    session:session
+                                                     method:[CustomGDCMISNetworkProvider httpMethodString:httpRequestMethod]
+                                                       body:body
+                                                    headers:additionalHeaders
+                                                inputStream:nil
+                                               outputStream:nil
+                                              bytesExpected:0
+                                            completionBlock:completionBlock
+                                              progressBlock:nil];
     
     if(!success && completionBlock)
     {
@@ -71,17 +71,17 @@ withHttpMethod:(CMISHttpRequestMethod)httpRequestMethod
        headers:(NSDictionary *)additionalHeaders
 completionBlock:(void (^)(CMISHttpResponse *httpResponse, NSError *error))completionBlock
 {
-    AlfrescoGDHttpRequest *requestHandler = [[AlfrescoGDHttpRequest alloc] init];
-    BOOL success = [requestHandler prepareConnectionWithURL:url
-                                          session:session
-                                           method:[AlfrescoGDNetworkProvider httpMethodString:httpRequestMethod]
-                                             body:nil
-                                          headers:additionalHeaders
-                                      inputStream:(GDCReadStream *)inputStream
-                                     outputStream:nil
-                                    bytesExpected:0
-                                  completionBlock:completionBlock
-                                    progressBlock:nil];
+    CustomGDCMISHttpRequest *request = [[CustomGDCMISHttpRequest alloc] init];
+    BOOL success = [request prepareConnectionWithURL:url
+                                                    session:session
+                                                     method:[CustomGDCMISNetworkProvider httpMethodString:httpRequestMethod]
+                                                       body:nil
+                                                    headers:additionalHeaders
+                                                inputStream:(GDCReadStream *)inputStream
+                                               outputStream:nil
+                                              bytesExpected:0
+                                            completionBlock:completionBlock
+                                              progressBlock:nil];
     if(!success && completionBlock)
     {
         NSString *detailedDescription = [NSString stringWithFormat:@"Could not create connection to %@", [url absoluteString]];
@@ -101,17 +101,17 @@ completionBlock:(void (^)(CMISHttpResponse *httpResponse, NSError *error))comple
  progressBlock:(void (^)(unsigned long long bytesDownloaded, unsigned long long bytesTotal))progressBlock
  requestObject:(CMISRequest *)requestObject
 {
-    AlfrescoGDHttpRequest *requestHandler = [[AlfrescoGDHttpRequest alloc] init];
-    BOOL success = [requestHandler prepareConnectionWithURL:url
-                                          session:session
-                                           method:[AlfrescoGDNetworkProvider httpMethodString:httpRequestMethod]
-                                             body:nil
-                                          headers:additionalHeaders
-                                      inputStream:(GDCReadStream *)inputStream
-                                     outputStream:nil
-                                    bytesExpected:bytesExpected
-                                  completionBlock:completionBlock
-                                    progressBlock:progressBlock];
+    CustomGDCMISHttpRequest *request = [[CustomGDCMISHttpRequest alloc] init];
+    BOOL success = [request prepareConnectionWithURL:url
+                                                    session:session
+                                                     method:[CustomGDCMISNetworkProvider httpMethodString:httpRequestMethod]
+                                                       body:nil
+                                                    headers:additionalHeaders
+                                                inputStream:(GDCReadStream *)inputStream
+                                               outputStream:nil
+                                              bytesExpected:bytesExpected
+                                            completionBlock:completionBlock
+                                              progressBlock:progressBlock];
     if(!success && completionBlock)
     {
         NSString *detailedDescription = [NSString stringWithFormat:@"Could not create connection to %@", [url absoluteString]];
@@ -120,7 +120,7 @@ completionBlock:(void (^)(CMISHttpResponse *httpResponse, NSError *error))comple
     }
     else
     {
-        requestObject.httpRequest = self;
+        requestObject.httpRequest = request;
     }
 }
 
@@ -133,17 +133,17 @@ completionBlock:(void (^)(CMISHttpResponse *httpResponse, NSError *error))comple
  progressBlock:(void (^)(unsigned long long bytesDownloaded, unsigned long long bytesTotal))progressBlock
  requestObject:(CMISRequest*)requestObject
 {
-    AlfrescoGDHttpRequest *requestHandler = [[AlfrescoGDHttpRequest alloc] init];
-    BOOL success = [requestHandler prepareConnectionWithURL:url
-                                          session:session
-                                           method:[AlfrescoGDNetworkProvider httpMethodString:httpRequestMethod]
-                                             body:nil
-                                          headers:nil
-                                      inputStream:nil
-                                     outputStream:(GDCWriteStream *)outputStream
-                                    bytesExpected:bytesExpected
-                                  completionBlock:completionBlock
-                                    progressBlock:progressBlock];
+    CustomGDCMISHttpRequest *request = [[CustomGDCMISHttpRequest alloc] init];
+    BOOL success = [request prepareConnectionWithURL:url
+                                                    session:session
+                                                     method:[CustomGDCMISNetworkProvider httpMethodString:httpRequestMethod]
+                                                       body:nil
+                                                    headers:nil
+                                                inputStream:nil
+                                               outputStream:(GDCWriteStream *)outputStream
+                                              bytesExpected:bytesExpected
+                                            completionBlock:completionBlock
+                                              progressBlock:progressBlock];
     if(!success && completionBlock)
     {
         NSString *detailedDescription = [NSString stringWithFormat:@"Could not create connection to %@", [url absoluteString]];
@@ -152,7 +152,7 @@ completionBlock:(void (^)(CMISHttpResponse *httpResponse, NSError *error))comple
     }
     else
     {
-        requestObject.httpRequest = self;
+        requestObject.httpRequest = request;
     }
 }
 

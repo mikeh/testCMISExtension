@@ -30,7 +30,7 @@
 #import "CMISRequest.h"
 #import "CMISSessionParameters.h"
 
-@interface AlfrescoGDHttpRequest : GDHttpRequest <GDHttpRequestDelegate>
+@interface CustomGDCMISHttpRequest : GDHttpRequest <GDHttpRequestDelegate>
 @property (nonatomic, strong) id<GDHttpRequestDelegate> strongHttpRequestDelegate;
 - (void)cancel;
 - (BOOL)prepareConnectionWithURL:(NSURL *)url
