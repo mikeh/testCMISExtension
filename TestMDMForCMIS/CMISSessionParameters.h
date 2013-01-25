@@ -16,7 +16,7 @@
 #import "CMISEnums.h"
 #import "CMISBinding.h"
 #import "CMISAuthenticationProvider.h"
-
+#import "CMISNetworkProvider.h"
 
 // Session param keys
 /**
@@ -25,12 +25,6 @@
 extern NSString * const kCMISSessionParameterCustomFileIO;
 extern NSString * const kCMISSessionParameterCustomFileManager;
 extern NSString * const kCMISSessionFileIOProvider;
-/**
- Key for setting a range of custom classes to override the built in network IO handling.
- */
-extern NSString * const kCMISSessionParameterCustomNetworkIO;
-extern NSString * const kCMISSessionParameterCustomRequest;
-extern NSString * const kCMISSessionNetworkProvider;
 
 /**
  * Key for setting the class that is responsible for converting all kinds of CMIS objects.
@@ -62,6 +56,9 @@ extern NSString * const kCMISSessionParameterMode;
 // Authentication
 
 @property (nonatomic, strong) id<CMISAuthenticationProvider> authenticationProvider;
+
+// Network I/O
+@property (nonatomic, strong) id<CMISNetworkProvider> networkProvider;
 
 - (id)initWithBindingType:(CMISBindingType)bindingType;
 

@@ -14,7 +14,7 @@
 
 #import <Foundation/Foundation.h>
 #import "CMISBindingSession.h"
-#import "CMISHttpUtil.h"
+#import "CMISNetworkProvider.h"
 
 @interface CMISHttpRequest : NSObject <NSURLConnectionDataDelegate>
 

@@ -13,10 +13,74 @@
  */
 
 #import <Foundation/Foundation.h>
-#import "CMISSessionParameters.h"
-@interface CMISNetworkProvider : NSObject
-@property (nonatomic, strong, readonly) Class invokerClass;
+typedef enum {
+    HTTP_GET,
+    HTTP_POST,
+    HTTP_PUT,
+    HTTP_DELETE
+} CMISHttpRequestMethod;
 
-+ (CMISNetworkProvider *)providerWithParameters:(CMISSessionParameters *)parameters;
+@class CMISBindingSession, CMISRequest, CMISHttpResponse;
+
+
+@protocol CMISNetworkProvider <NSObject>
+
+- (void)invoke:(NSURL *)url
+withHttpMethod:(CMISHttpRequestMethod)httpRequestMethod
+   withSession:(CMISBindingSession *)session
+          body:(NSData *)body
+       headers:(NSDictionary *)additionalHeaders
+completionBlock:(void (^)(CMISHttpResponse *httpResponse, NSError *error))completionBlock;
+
+- (void)invoke:(NSURL *)url
+withHttpMethod:(CMISHttpRequestMethod)httpRequestMethod
+   withSession:(CMISBindingSession *)session
+   inputStream:(NSInputStream *)inputStream
+       headers:(NSDictionary *)additionalHeaders
+completionBlock:(void (^)(CMISHttpResponse *httpResponse, NSError *error))completionBlock;
+
+
+- (void)invoke:(NSURL *)url withHttpMethod:(CMISHttpRequestMethod)httpRequestMethod
+   withSession:(CMISBindingSession *)session
+   inputStream:(NSInputStream *)inputStream
+       headers:(NSDictionary *)additionalHeaders
+ bytesExpected:(unsigned long long)bytesExpected
+completionBlock:(void (^)(CMISHttpResponse *httpResponse, NSError *error))completionBlock
+ progressBlock:(void (^)(unsigned long long bytesDownloaded, unsigned long long bytesTotal))progressBlock
+ requestObject:(CMISRequest *)requestObject;
+
+- (void)invoke:(NSURL *)url
+withHttpMethod:(CMISHttpRequestMethod)httpRequestMethod
+   withSession:(CMISBindingSession *)session
+  outputStream:(NSOutputStream *)outputStream
+ bytesExpected:(unsigned long long)bytesExpected
+completionBlock:(void (^)(CMISHttpResponse *httpResponse, NSError *error))completionBlock
+ progressBlock:(void (^)(unsigned long long bytesDownloaded, unsigned long long bytesTotal))progressBlock
+ requestObject:(CMISRequest*)requestObject;
+
+
+
+- (void)invokeGET:(NSURL *)url
+      withSession:(CMISBindingSession *)session
+  completionBlock:(void (^)(CMISHttpResponse *httpResponse, NSError *error))completionBlock;
+
+
+- (void)invokePOST:(NSURL *)url
+       withSession:(CMISBindingSession *)session
+              body:(NSData *)body
+           headers:(NSDictionary *)additionalHeaders
+   completionBlock:(void (^)(CMISHttpResponse *httpResponse, NSError *error))completionBlock;
+
+- (void)invokePUT:(NSURL *)url
+      withSession:(CMISBindingSession *)session
+             body:(NSData *)body
+          headers:(NSDictionary *)additionalHeaders
+  completionBlock:(void (^)(CMISHttpResponse *httpResponse, NSError *error))completionBlock;
+
+- (void)invokeDELETE:(NSURL *)url
+         withSession:(CMISBindingSession *)session
+     completionBlock:(void (^)(CMISHttpResponse *httpResponse, NSError *error))completionBlock;
+
+
 
 @end

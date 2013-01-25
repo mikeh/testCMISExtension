@@ -1,10 +1,22 @@
-//
-//  SampleTableViewController.m
-//  TestMDMForCMIS
-//
-//  Created by Peter Schmidt on 09/01/2013.
-//  Copyright (c) 2013 Peter Schmidt. All rights reserved.
-//
+/*
+ ******************************************************************************
+ * Copyright (C) 2005-2012 Alfresco Software Limited.
+ *
+ * This file is part of the Alfresco Mobile SDK.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *  http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ *****************************************************************************
+ */
 
 #import "SampleTableViewController.h"
 #import "CMISSession.h"
@@ -17,9 +29,8 @@
 #import "TestFileManager.h"
 #import "CMISConstants.h"
 #import <GD/GDFileSystem.h>
-#import "GDHttpUtil.h"
 #import "CMISFileUtil.h"
-#import "GDHttpUtilWithSockets.h"
+#import "AlfrescoGDNetworkProvider.h"
 
 @interface SampleTableViewController ()
 @property (nonatomic, strong) CMISSession * session;
@@ -129,11 +140,15 @@
     /**
      Network IO setting. We need to provide the HTTP invoker here
      */
+    AlfrescoGDNetworkProvider *networkProvider = [[AlfrescoGDNetworkProvider alloc] init];
+    parameters.networkProvider = networkProvider;
+
+    /*
     NSMutableDictionary *networkExtension = [NSMutableDictionary dictionary];
     const char * networkClassName = class_getName([GDHttpUtil class]);
     [networkExtension setObject:[NSString stringWithUTF8String:networkClassName] forKey:kCMISSessionParameterCustomRequest];
     [parameters setObject:networkExtension forKey:kCMISSessionParameterCustomNetworkIO];
-    
+     */
     
     [CMISSession connectWithSessionParameters:parameters completionBlock:^(CMISSession *session, NSError *error){
         if (nil == session)
@@ -291,7 +306,6 @@
     {
         return;
     }
-    self.request = [[CMISRequest alloc] init];
     if (self.session && self.testDocId)
     {
         [self.session retrieveObject:self.testDocId completionBlock:^(CMISObject *object, NSError *error){
