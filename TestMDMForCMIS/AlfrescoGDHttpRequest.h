@@ -19,7 +19,28 @@
  */
 
 #import <GD/GDNETiOS.h>
+#import <GD/GDFileSystem.h>
+#import "CMISNetworkProvider.h"
+#import "CMISAuthenticationProvider.h"
+#import "CMISErrors.h"
+#import "CMISHttpResponse.h"
+#import "CMISHttpRequest.h"
+#import "CMISHttpDownloadRequest.h"
+#import "CMISHttpUploadRequest.h"
+#import "CMISRequest.h"
+#import "CMISSessionParameters.h"
 
-@interface AlfrescoGDHttpRequest : GDHttpRequest 
+@interface AlfrescoGDHttpRequest : GDHttpRequest <GDHttpRequestDelegate>
 @property (nonatomic, strong) id<GDHttpRequestDelegate> strongHttpRequestDelegate;
+- (void)cancel;
+- (BOOL)prepareConnectionWithURL:(NSURL *)url
+                         session:(CMISBindingSession *)session
+                          method:(NSString *)httpMethod
+                            body:(NSData *)body
+                         headers:(NSDictionary *)headers
+                     inputStream:(GDCReadStream *)inputStream
+                    outputStream:(GDCWriteStream *)outputStream
+                   bytesExpected:(unsigned long long)expected
+                 completionBlock:(void (^)(CMISHttpResponse *httpResponse, NSError *error))completionBlock
+                   progressBlock:(void (^)(unsigned long long bytesDownloaded, unsigned long long bytesTotal))progressBlock;
 @end

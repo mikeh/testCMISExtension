@@ -27,7 +27,6 @@
 #import "CMISHttpUploadRequest.h"
 #import "CMISRequest.h"
 #import "CMISSessionParameters.h"
-#import "AlfrescoGDHttpRequestHandler.h"
 
 @interface AlfrescoGDNetworkProvider ()
 + (NSString *)httpMethodString:(CMISHttpRequestMethod) requestMethod;
@@ -45,7 +44,7 @@ withHttpMethod:(CMISHttpRequestMethod)httpRequestMethod
        headers:(NSDictionary *)additionalHeaders
 completionBlock:(void (^)(CMISHttpResponse *httpResponse, NSError *error))completionBlock
 {
-    AlfrescoGDHttpRequestHandler *requestHandler = [[AlfrescoGDHttpRequestHandler alloc] init];
+    AlfrescoGDHttpRequest *requestHandler = [[AlfrescoGDHttpRequest alloc] init];
     BOOL success = [requestHandler prepareConnectionWithURL:url
                                           session:session
                                            method:[AlfrescoGDNetworkProvider httpMethodString:httpRequestMethod]
@@ -72,7 +71,7 @@ withHttpMethod:(CMISHttpRequestMethod)httpRequestMethod
        headers:(NSDictionary *)additionalHeaders
 completionBlock:(void (^)(CMISHttpResponse *httpResponse, NSError *error))completionBlock
 {
-    AlfrescoGDHttpRequestHandler *requestHandler = [[AlfrescoGDHttpRequestHandler alloc] init];
+    AlfrescoGDHttpRequest *requestHandler = [[AlfrescoGDHttpRequest alloc] init];
     BOOL success = [requestHandler prepareConnectionWithURL:url
                                           session:session
                                            method:[AlfrescoGDNetworkProvider httpMethodString:httpRequestMethod]
@@ -102,7 +101,7 @@ completionBlock:(void (^)(CMISHttpResponse *httpResponse, NSError *error))comple
  progressBlock:(void (^)(unsigned long long bytesDownloaded, unsigned long long bytesTotal))progressBlock
  requestObject:(CMISRequest *)requestObject
 {
-    AlfrescoGDHttpRequestHandler *requestHandler = [[AlfrescoGDHttpRequestHandler alloc] init];
+    AlfrescoGDHttpRequest *requestHandler = [[AlfrescoGDHttpRequest alloc] init];
     BOOL success = [requestHandler prepareConnectionWithURL:url
                                           session:session
                                            method:[AlfrescoGDNetworkProvider httpMethodString:httpRequestMethod]
@@ -134,7 +133,7 @@ completionBlock:(void (^)(CMISHttpResponse *httpResponse, NSError *error))comple
  progressBlock:(void (^)(unsigned long long bytesDownloaded, unsigned long long bytesTotal))progressBlock
  requestObject:(CMISRequest*)requestObject
 {
-    AlfrescoGDHttpRequestHandler *requestHandler = [[AlfrescoGDHttpRequestHandler alloc] init];
+    AlfrescoGDHttpRequest *requestHandler = [[AlfrescoGDHttpRequest alloc] init];
     BOOL success = [requestHandler prepareConnectionWithURL:url
                                           session:session
                                            method:[AlfrescoGDNetworkProvider httpMethodString:httpRequestMethod]

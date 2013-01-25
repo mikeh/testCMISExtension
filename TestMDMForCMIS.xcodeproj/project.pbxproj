@@ -35,7 +35,6 @@
 		4E96A57F16835319001AABEB /* GDCWriteStream+OutputStream.m in Sources */ = {isa = PBXBuildFile; fileRef = 4E96A57E16835318001AABEB /* GDCWriteStream+OutputStream.m */; };
 		4EB9893316838297007C42E4 /* test_file.txt in Resources */ = {isa = PBXBuildFile; fileRef = 4E96A56E16831AEB001AABEB /* test_file.txt */; };
 		4EED47B316B2799900A0BAAC /* AlfrescoGDNetworkProvider.m in Sources */ = {isa = PBXBuildFile; fileRef = 4EED47B216B2799900A0BAAC /* AlfrescoGDNetworkProvider.m */; };
-		4EED47B916B2A16400A0BAAC /* AlfrescoGDHttpRequestHandler.m in Sources */ = {isa = PBXBuildFile; fileRef = 4EED47B816B2A16400A0BAAC /* AlfrescoGDHttpRequestHandler.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -164,8 +163,6 @@
 		4EED47B016B2789700A0BAAC /* CMISDefaultNetworkProvider.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CMISDefaultNetworkProvider.h; sourceTree = "<group>"; };
 		4EED47B116B2799900A0BAAC /* AlfrescoGDNetworkProvider.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AlfrescoGDNetworkProvider.h; sourceTree = "<group>"; };
 		4EED47B216B2799900A0BAAC /* AlfrescoGDNetworkProvider.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AlfrescoGDNetworkProvider.m; sourceTree = "<group>"; };
-		4EED47B716B2A16400A0BAAC /* AlfrescoGDHttpRequestHandler.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AlfrescoGDHttpRequestHandler.h; sourceTree = "<group>"; };
-		4EED47B816B2A16400A0BAAC /* AlfrescoGDHttpRequestHandler.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AlfrescoGDHttpRequestHandler.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -245,8 +242,6 @@
 				4E73098016B192BB0055A629 /* AlfrescoGDHttpRequest.m */,
 				4EED47B116B2799900A0BAAC /* AlfrescoGDNetworkProvider.h */,
 				4EED47B216B2799900A0BAAC /* AlfrescoGDNetworkProvider.m */,
-				4EED47B716B2A16400A0BAAC /* AlfrescoGDHttpRequestHandler.h */,
-				4EED47B816B2A16400A0BAAC /* AlfrescoGDHttpRequestHandler.m */,
 			);
 			path = TestMDMForCMIS;
 			sourceTree = "<group>";
@@ -449,7 +444,6 @@
 				4E38805E169D84AA004BB186 /* SampleTableViewController.m in Sources */,
 				4E73098116B192BB0055A629 /* AlfrescoGDHttpRequest.m in Sources */,
 				4EED47B316B2799900A0BAAC /* AlfrescoGDNetworkProvider.m in Sources */,
-				4EED47B916B2A16400A0BAAC /* AlfrescoGDHttpRequestHandler.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
