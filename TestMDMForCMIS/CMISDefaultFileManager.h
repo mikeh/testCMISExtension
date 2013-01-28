@@ -14,6 +14,7 @@
 
 #import <Foundation/Foundation.h>
 #import "CMISFileManager.h"
-@interface CMISPlaceholderFileManager : CMISFileManager
+
+@interface CMISDefaultFileManager : CMISFileManager
 
 @end

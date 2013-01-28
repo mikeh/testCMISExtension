@@ -13,123 +13,68 @@
  */
 
 #import <Foundation/Foundation.h>
-#import "CMISSessionParameters.h"
+
 @interface CMISFileManager : NSObject
 
-+(id)initWithSessionParameters:(CMISSessionParameters *)parameters;
++(id)defaultManager;
 
-/**
- some APIs don't fully implement NSStream properties, such as streamStatus. But we need that in the CMIS lib
- */
-+ (BOOL)fileStreamIsOpen:(NSStream *)stream;
 
-/**
- Call this function to get the home directory for the app
- */
-+ (NSString *)homeDirectory;
-
-/**
- Call this function to get the documents directory for the app
- */
-+ (NSString *)documentsDirectory;
+-(id)initWithClassName:(NSString *)className;
 
 /**
  Call this function to get the temporary directory for the app
  */
-+ (NSString *)temporaryDirectory;
-
-/**
- Call this to check if a file exists at the path location
- 
- @returns bool - True if the file/folder exists
- */
-+ (BOOL)fileExistsAtPath:(NSString *)path;
-
-/**
- Call this to check if a file exists at the path location passing in a memory reference pointer to a BOOL which
- indicates if the path points to a directory
- 
- @returns bool - True if the file/folder exists
- */
-+ (BOOL)fileExistsAtPath:(NSString *)path isDirectory:(BOOL *)isDirectory;
+- (NSString *)temporaryDirectory;
 
 /*
  Call this to create a file with data passed in at a given location
- 
+ @param path  The full path where the file is to be created
+ @param data  The content of the file
+ @param error Error, will be nil if ok.
  @returns bool - True if the file was created successfully
  */
-+ (BOOL)createFileAtPath:(NSString *)path contents:(NSData *)data error:(NSError **)error;
-
-/*
- Call this to create a directory at a given path. Set the createIntermediateDirectories to true if you would like to
- create leading directories if they do not exist
- 
- @returns bool - True if the directory was created successfully
- */
-+ (BOOL)createDirectoryAtPath:(NSString *)path withIntermediateDirectories:(BOOL)createIntermediates attributes:(NSDictionary *)attributes error:(NSError **)error;
+- (BOOL)createFileAtPath:(NSString *)path contents:(NSData *)data error:(NSError **)error;
 
 /*
  Call this to remove an item at a given path
- 
+ @param path The full file path of the item to be removed
+ @param error The error. Will be nil, if successful
  @returns bool - True if the file/folder was removed successfully
  */
-+ (BOOL)removeItemAtPath:(NSString *)path error:(NSError **)error;
-
-/*
- Call this to copy an item from a given path to another path within the current file system
- 
- @returns bool - True if the file was copied successfully
- */
-+ (BOOL)copyItemAtPath:(NSString *)sourcePath toPath:(NSString *)destinationPath error:(NSError **)error;
-
-/*
- Call this to move an item from a given path to another within the current file system
- 
- @returns bool - True if the item was moved successfully
- */
-+ (BOOL)moveItemAtPath:(NSString *)sourcePath toPath:(NSString *)destinationPath error:(NSError **)error;
+- (BOOL)removeItemAtPath:(NSString *)path error:(NSError **)error;
 
 /*
  Call this to return the attributes of a given item at a path
- 
+ @param path The full file path
+ @param error The error, will be nil if successful
  @returns dictionary - dictionary containing fileSize, isFolder and lastModifiedDate
  */
-+ (NSDictionary *)attributesOfItemAtPath:(NSString *)path error:(NSError **)error;
-
-/*
- Call this to return an array of all items in a given directory
- 
- @returns array - array containing a list of items in a given directory
- */
-+ (NSArray *)contentsOfDirectoryAtPath:(NSString *)directoryPath error:(NSError **)error;
-
-/*
- Enumerates through a given directory either including or not including sub directories
- */
-+ (void)enumerateThroughDirectory:(NSString *)directory includingSubDirectories:(BOOL)includeSubDirectories error:(NSError **)error withBlock:(void (^)(NSString *fullFilePath))block;
-
-/*
- Returns the data representation of the file at a given URL
- 
- @returns data - NSData representation of the item at the given URL location
- */
-+ (NSData *)dataWithContentsOfURL:(NSURL *)url;
+- (NSDictionary *)attributesOfItemAtPath:(NSString *)path error:(NSError **)error;
 
 /*
  Call this to append data to the file at a given path
+ @param filePath The full file path
+ @param data the content to append the file with
  */
-+ (void)appendToFileAtPath:(NSString *)filePath data:(NSData *)data;
+- (void)appendToFileAtPath:(NSString *)filePath data:(NSData *)data;
 
 /*
  Call this to retrieve the internal filePath from a file name
- 
+ @param fileName The file name
  @returns string - the filePath in relation to a given fileName
  */
-+ (NSString *)internalFilePathFromName:(NSString *)fileName;
+- (NSString *)internalFilePathFromName:(NSString *)fileName;
 
+/*
+ @param filePath The full file path for which an input stream will be created
+ @return input stream object for given file path. May be a customised extension to NSInputStream
+ */
+- (id)inputStreamWithFileAtPath:(NSString *)filePath;
 
-+ (id)inputStreamWithFileAtPath:(NSString *)filePath;
-
-+ (void)encodeContentFromInputStream:(NSInputStream *)inputStream andAppendToFile:(NSString *)filePath;
+/*
+ @param inputStream The input stream from which the data will be taken for encoding
+ @param filePath The file path to which the encoded data will be appended
+ */
+- (void)encodeContentFromInputStream:(NSInputStream *)inputStream andAppendToFile:(NSString *)filePath;
 
 @end

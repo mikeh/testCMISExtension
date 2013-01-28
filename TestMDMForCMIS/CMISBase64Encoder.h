@@ -26,6 +26,4 @@
 
 + (NSString *)encodeContentFromInputStream:(id)inputStream;
 
-+ (void)encodeContentFromInputStream:(id)inputStream andAppendToFile:(NSString *)destinationFilePath;
-
 @end

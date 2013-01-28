@@ -18,16 +18,12 @@
  *****************************************************************************
  */
 
-#import "TestFileManager.h"
+#import "CustomGDCMISFileManager.h"
 #import "CMISBase64Encoder.h"
-#import "GDCCustomReadStream.h"
-
 static NSString * kTMPDIRNAME = @"/tmp";
 
-@implementation TestFileManager
-
-
-+ (void)encodeContentFromInputStream:(GDCReadStream *)inputStream andAppendToFile:(NSString *)filePath
+@implementation CustomGDCMISFileManager
+- (void)encodeContentFromInputStream:(GDCReadStream *)inputStream andAppendToFile:(NSString *)filePath
 {
     if (![inputStream hasBytesAvailable])
     {
@@ -44,17 +40,14 @@ static NSString * kTMPDIRNAME = @"/tmp";
             NSMutableData *bytesRead = [NSMutableData data];
             [bytesRead appendBytes:(const void *)buffer length:readBytes];
             NSData *encodedBytes = [CMISBase64Encoder dataByEncodingText:bytesRead];
-            [TestFileManager appendToFileAtPath:filePath data:encodedBytes];
+            [self appendToFileAtPath:filePath data:encodedBytes];
         }
     }
     
 }
 
-+ (GDCReadStream *)inputStreamWithFileAtPath:(NSString *)filePath
+- (GDCReadStream *)inputStreamWithFileAtPath:(NSString *)filePath
 {
-//    GDCCustomReadStream *inputStream = [GDCCustomReadStream inputStreamWithFileAtPath:filePath];
-    /*
-     */
     NSError *error = nil;
     GDCReadStream *inputStream = [GDFileSystem getReadStream:filePath error:&error];
     if (error)
@@ -64,7 +57,7 @@ static NSString * kTMPDIRNAME = @"/tmp";
     return inputStream;
 }
 
-+ (void)appendToFileAtPath:(NSString *)filePath data:(NSData *)data
+- (void)appendToFileAtPath:(NSString *)filePath data:(NSData *)data
 {
     GDFileStat stats;
     NSError *error = nil;
@@ -77,31 +70,31 @@ static NSString * kTMPDIRNAME = @"/tmp";
     NSInteger offset = stats.fileLen;
     
     /*
-    GDCWriteStream *writeStream = [GDFileSystem getWriteStream:filePath appendmode:YES error:&error];
-    if (!writeStream)
-    {
-        NSLog(@"couldn't create a write stream");
-        return;
-    }
-    if (![writeStream hasSpaceAvailable])
-    {
-        NSLog(@"no space available in write stream");
-        return;
-    }
-    
-    NSUInteger bufferSize = [data length];
-    uint8_t buffer[bufferSize];
-    [data getBytes:buffer length:bufferSize];
-    NSUInteger byteswritten = [writeStream write:(const uint8_t *)(&buffer) maxLength:bufferSize];
-    if (byteswritten != -1)
-    {
-        NSLog(@"we wrote %d bytes", byteswritten);
-        NSLog(@"We succeeded in calling appendToFilePath and added %d data to the end of the file from offset %d", [data length], offset);
-    }
-    else
-    {
-        NSLog(@"somehow we failed to write to the file");
-    }
+     GDCWriteStream *writeStream = [GDFileSystem getWriteStream:filePath appendmode:YES error:&error];
+     if (!writeStream)
+     {
+     NSLog(@"couldn't create a write stream");
+     return;
+     }
+     if (![writeStream hasSpaceAvailable])
+     {
+     NSLog(@"no space available in write stream");
+     return;
+     }
+     
+     NSUInteger bufferSize = [data length];
+     uint8_t buffer[bufferSize];
+     [data getBytes:buffer length:bufferSize];
+     NSUInteger byteswritten = [writeStream write:(const uint8_t *)(&buffer) maxLength:bufferSize];
+     if (byteswritten != -1)
+     {
+     NSLog(@"we wrote %d bytes", byteswritten);
+     NSLog(@"We succeeded in calling appendToFilePath and added %d data to the end of the file from offset %d", [data length], offset);
+     }
+     else
+     {
+     NSLog(@"somehow we failed to write to the file");
+     }
      */
     
     NSLog(@"the offset says we have %d bytes. The actual data length is %d", offset, [data length]);
@@ -114,32 +107,8 @@ static NSString * kTMPDIRNAME = @"/tmp";
     
 }
 
-/*
- + (unsigned long long)fileSizeForFileAtPath:(NSString *)filePath error:(NSError * *)outError
- {
- NSDictionary *attributes = [[NSFileManager defaultManager] attributesOfItemAtPath:filePath error:outError];
- 
- if (*outError == nil) {
- return [attributes fileSize];
- }
- 
- return 0LL;
- }
- */
 
-+ (BOOL)fileStreamIsOpen:(NSStream *)stream
-{
-    BOOL isStreamOpen = NO;
-    if (nil != stream)
-    {
-        isStreamOpen = YES;
-    }
-    return isStreamOpen;
-}
-
-
-
-+ (NSDictionary *)attributesOfItemAtPath:(NSString *)path error:(NSError **)outError
+- (NSDictionary *)attributesOfItemAtPath:(NSString *)path error:(NSError **)outError
 {
     NSMutableDictionary *fileAttributes = [NSMutableDictionary dictionary];
     GDFileStat myStat;
@@ -159,7 +128,7 @@ static NSString * kTMPDIRNAME = @"/tmp";
 
 
 
-+ (BOOL)createFileAtPath:(NSString *)filePath contents:(NSData *)data error:(NSError **)error
+- (BOOL)createFileAtPath:(NSString *)filePath contents:(NSData *)data error:(NSError **)error
 {
     NSString *dataToBeWritten = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
     NSLog(@"Trying to set up the file at location %@ with content %@", filePath, dataToBeWritten);
@@ -175,7 +144,7 @@ static NSString * kTMPDIRNAME = @"/tmp";
     return isOk;
 }
 
-+ (BOOL)removeItemAtPath:(NSString *)filePath error:(NSError **)error
+- (BOOL)removeItemAtPath:(NSString *)filePath error:(NSError **)error
 {
     BOOL isOk = [GDFileSystem removeItemAtPath:filePath error:error];
     if (!isOk)
@@ -185,7 +154,7 @@ static NSString * kTMPDIRNAME = @"/tmp";
     return isOk;
 }
 
-+ (NSString *)internalFilePathFromName:(NSString *)fileName
+- (NSString *)internalFilePathFromName:(NSString *)fileName
 {
     NSString *tmpDirectory = [self temporaryDirectory];
     if (tmpDirectory)
@@ -201,7 +170,7 @@ static NSString * kTMPDIRNAME = @"/tmp";
 }
 
 
-+ (NSString *)temporaryDirectory
+- (NSString *)temporaryDirectory
 {
     BOOL isDir;
     BOOL tmpExists = [GDFileSystem fileExistsAtPath:kTMPDIRNAME isDirectory:&isDir];
@@ -220,64 +189,6 @@ static NSString * kTMPDIRNAME = @"/tmp";
         }
     }
     return kTMPDIRNAME;
-}
-
-+ (BOOL)fileExistsAtPath:(NSString *)path
-{
-    BOOL isDir;
-    return [GDFileSystem fileExistsAtPath:path isDirectory:&isDir];
-}
-
-+ (BOOL)fileExistsAtPath:(NSString *)path isDirectory:(BOOL *)isDirectory
-{
-    BOOL isDir;
-    BOOL pathExists = [GDFileSystem fileExistsAtPath:path isDirectory:&isDir];
-    return pathExists;
-}
-
-+ (BOOL)createDirectoryAtPath:(NSString *)path
-  withIntermediateDirectories:(BOOL)createIntermediates
-                   attributes:(NSDictionary *)attributes
-                        error:(NSError **)error
-{
-    return [GDFileSystem createDirectoryAtPath:path withIntermediateDirectories:createIntermediates attributes:attributes error:error];
-}
-
-#pragma the following are not yet required in CMIS lib.
-
-
-
-
-+ (BOOL)copyItemAtPath:(NSString *)sourcePath toPath:(NSString *)destinationPath error:(NSError **)error
-{
-    return YES;
-}
-
-+ (BOOL)moveItemAtPath:(NSString *)sourcePath toPath:(NSString *)destinationPath error:(NSError **)error
-{
-    return YES;
-}
-
-+ (NSArray *)contentsOfDirectoryAtPath:(NSString *)directoryPath error:(NSError **)error
-{
-    return nil;
-}
-
-+ (void)enumerateThroughDirectory:(NSString *)directory includingSubDirectories:(BOOL)includeSubDirectories error:(NSError **)error withBlock:(void (^)(NSString *fullFilePath))block{}
-
-+ (NSData *)dataWithContentsOfURL:(NSURL *)url
-{
-    return nil;
-}
-
-+ (NSString *)homeDirectory
-{
-    return nil;
-}
-
-+ (NSString *)documentsDirectory
-{
-    return nil;
 }
 
 @end

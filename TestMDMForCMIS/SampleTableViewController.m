@@ -26,10 +26,13 @@
 #import <objc/runtime.h>
 #import "GDCCustomReadStream.h"
 #import "GDCWriteStream+OutputStream.h"
-#import "TestFileManager.h"
+//#import "TestFileManager.h"
 #import "CMISConstants.h"
 #import <GD/GDFileSystem.h>
-#import "CMISFileUtil.h"
+//#import "CMISFileUtil.h"
+#import "CMISFileManager.h"
+#import "CustomGDCMISFileManager.h"
+//#import "CMISDefaultFileManager.h"
 #import "CustomGDCMISNetworkProvider.h"
 
 @interface SampleTableViewController ()
@@ -131,10 +134,15 @@
     /**
      File IO setting. We need to have the test manager defined here
      */
+    CMISFileManager *fileManager = [[CMISFileManager alloc] initWithClassName:@"CustomGDCMISFileManager"];
+    parameters.fileManager = fileManager;
+    
+    /*
     NSMutableDictionary *paramExtensions = [NSMutableDictionary dictionary];
     const char * fileManagerName = class_getName([TestFileManager class]);
     [paramExtensions setObject:[NSString stringWithUTF8String:fileManagerName] forKey:kCMISSessionParameterCustomFileManager];
     [parameters setObject:paramExtensions forKey:kCMISSessionParameterCustomFileIO];
+     */
 
 
     /**
@@ -463,6 +471,7 @@
  */
 - (NSString *)temporaryTestFileForUpload
 {
+    CMISFileManager *manager = [CMISFileManager defaultManager];
     NSString *filePath = [[NSBundle bundleForClass:[self class]] pathForResource:@"test_file.txt" ofType:nil];
     NSFileHandle *fileHandle = [NSFileHandle fileHandleForUpdatingAtPath:filePath];
     NSData *content = [fileHandle readDataToEndOfFile];
@@ -470,10 +479,10 @@
     NSDateFormatter *formatter = [[NSDateFormatter alloc] init];
     [formatter setDateFormat: @"yyyy-MM-dd'T'HH-mm-ss-Z'"];
     NSString *documentName = [NSString stringWithFormat:@"test_file_%@.txt", [formatter stringFromDate:[NSDate date]]];
-    NSString * tmpPath = [FileUtil internalFilePathFromName:documentName];
+    NSString * tmpPath = [manager internalFilePathFromName:documentName];
 
     NSError *error = nil;
-    [FileUtil createFileAtPath:tmpPath contents:content error:&error];
+    [manager createFileAtPath:tmpPath contents:content error:&error];
 
     [fileHandle closeFile];
     return tmpPath;

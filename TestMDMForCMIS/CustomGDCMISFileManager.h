@@ -19,8 +19,9 @@
  */
 
 #import <Foundation/Foundation.h>
-#import "AlfrescoFileManagerDelegate.h"
 #import <GD/GDFileSystem.h>
-@interface TestFileManager : NSObject <AlfrescoFileManagerDelegate>
+#import "CMISFileManager.h"
+
+@interface CustomGDCMISFileManager : CMISFileManager
 
 @end
