@@ -19,6 +19,7 @@ NSString * HTTPHOST = @"Host: ";
 NSString * HTTPCODING = @"Transfer-Encoding: chunked";
 NSString * HTTPCONTENTLENGTH = @"Content-Length: ";
 NSString * HTTPCONNECTION = @"Connection: keep-alive";
+NSString * HTTPBASE64 = @"Content-Encoding: base64";
 NSString * HTTPLASTCHUNK = @"0\r\n";
 
 @interface CustomGDCMISSocketRequest ()
@@ -165,8 +166,8 @@ NSString * HTTPLASTCHUNK = @"0\r\n";
     [currentSocket.writeStream write:[HTTPCRLF UTF8String]];
     [currentSocket.writeStream write:[HTTPLASTCHUNK UTF8String]];
     [currentSocket write];
-    
      */
+    
     if (0 < self.bytesExpected)
     {
         NSLog(@"***** WE ARE WRITING IN A BUFFERED MANNER. BYTE SIZE IS %d ******", self.bytesExpected);
@@ -188,11 +189,13 @@ NSString * HTTPLASTCHUNK = @"0\r\n";
         
         while ([self.inputStream hasBytesAvailable])
         {
-            NSMutableData *chunkData = [NSMutableData dataWithCapacity:8192];
-            NSInteger bytes = [self.inputStream read:chunkData.mutableBytes maxLength:8192];
+            const NSUInteger bufferSize = 8192;
+            uint8_t buffer[bufferSize];
+            NSInteger bytes = [self.inputStream read:buffer maxLength:bufferSize];
             if (0 < bytes)
             {
-                [chunkData setLength:bytes];
+                NSData *chunkData = [NSData dataWithBytesNoCopy:buffer length:bytes];
+                NSLog(@"**** read in data are %@ ****",[[NSString alloc] initWithData:chunkData encoding:NSUTF8StringEncoding]);
                 NSData *encoded = [CMISBase64Encoder dataByEncodingText:chunkData];
                 [currentSocket.writeStream writeData:encoded];
                 [currentSocket write];
@@ -214,11 +217,12 @@ NSString * HTTPLASTCHUNK = @"0\r\n";
         [requestMessageData appendData:[CustomGDCMISSocketRequest xmlBodyOpenElementsWithMimeType:self.mimeType]];
         while ([self.inputStream hasBytesAvailable])
         {
-            NSMutableData *chunkData = [NSMutableData dataWithCapacity:8192];
-            NSInteger bytes = [self.inputStream read:chunkData.mutableBytes maxLength:8192];
+            const NSUInteger bufferSize = 8192;
+            uint8_t buffer[bufferSize];
+            NSInteger bytes = [self.inputStream read:buffer maxLength:bufferSize];
             if (0 < bytes)
             {
-                [chunkData setLength:bytes];
+                NSData *chunkData = [NSData dataWithBytesNoCopy:buffer length:bytes];
                 NSData *encoded = [CMISBase64Encoder dataByEncodingText:chunkData];
                 [requestMessageData appendData:encoded];
             }
@@ -392,6 +396,8 @@ NSString * HTTPLASTCHUNK = @"0\r\n";
     
     [requestHeader appendString:@"Accept: */*"];
     [requestHeader appendString:HTTPCRLF];
+    [requestHeader appendString:HTTPBASE64];
+    [requestHeader appendString:HTTPCRLF];
     NSString *lengthString = [NSString stringWithFormat:@"%@%d", HTTPCONTENTLENGTH, lengthInBytes];
     [requestHeader appendString:lengthString];
     [requestHeader appendString:HTTPCRLF];
@@ -475,7 +481,7 @@ NSString * HTTPLASTCHUNK = @"0\r\n";
 
 + (NSData *)xmlBodyOpenElementsWithMimeType:(NSString *)mimeType
 {
-    NSString *contentXMLStart = [NSString stringWithFormat:@"<cmisra:content>""<cmisra:mediatype>%@</cmisra:mediatype>""<cmisra:base64>", mimeType];
+    NSString *contentXMLStart = [NSString stringWithFormat:@"<cmisra:content><cmisra:mediatype>%@</cmisra:mediatype><cmisra:base64>", mimeType];
     return [contentXMLStart dataUsingEncoding:NSUTF8StringEncoding];    
 }
 

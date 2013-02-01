@@ -130,9 +130,9 @@
     parameters.atomPubUrl = [NSURL URLWithString:url];
     /**
      File IO setting. We need to have the test manager defined here
-     */
     CMISFileManager *fileManager = [[CMISFileManager alloc] initWithClassName:@"CustomGDCMISFileManager"];
     parameters.fileManager = fileManager;
+     */
     
     /*
     NSMutableDictionary *paramExtensions = [NSMutableDictionary dictionary];
