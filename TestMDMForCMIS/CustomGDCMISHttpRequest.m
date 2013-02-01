@@ -150,7 +150,8 @@
     {
         self.receivedData = [NSMutableData data];
     }
-    //    const char * responseHeader = [currentHttpRequest getAllResponseHeaders];
+    const char * responseHeader = [currentHttpRequest getAllResponseHeaders];
+    NSLog(@"The received header is \n%@",[NSString stringWithUTF8String:responseHeader]);
 }
 
 

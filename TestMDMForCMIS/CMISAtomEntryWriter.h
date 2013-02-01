@@ -20,7 +20,7 @@
 
 @interface CMISAtomEntryWriter : NSObject
 
-@property (nonatomic, strong) NSString *contentFilePath;
+//@property (nonatomic, strong) NSString *contentFilePath;
 @property (nonatomic, strong) NSInputStream *inputStream;
 @property (nonatomic, strong) NSString *mimeType;
 @property (nonatomic, strong) CMISProperties *cmisProperties;
@@ -44,6 +44,39 @@
 * If set to YES, the return value of this method is the XML is its whole.
 *
 */
-- (NSString *)generateAtomEntryXml;
+//- (NSString *)generateAtomEntryXml;
+
+/*
+ @return raw XML data as NSString
+ */
+- (NSString *)atomEntryXmlString;
+
+/*
+ @return tmp file path with XML data including base 64 encoded content data
+ */
+- (NSString *)atomEntryXmlFilePath;
+
+/*
+ creates an instance of CMISAtomEntryWriter.
+ XML data will be written to a string in memory.
+ The XML data are obtained using
+ atomEntryXmlString
+ Do not use atomEntryXmlFilePath with this initialiser.
+ @param cmisProperties - the properties used to create the atom pub XML string
+ */
+- (id)initWithProperties:(CMISProperties *)cmisProperties;
+
+/*
+ creates an instance of CMISAtomEntryWriter.
+ XML and base 64 encoded content data are written to a temporary file.
+ The temporary XML file is obtained using
+ atomEntryXmlFilePath
+ Do not use atomEntryXmlString with this initialiser.
+ @param cmisProperties - the properties used to create the atom pub XML string
+ */
+- (id)initWithProperties:(CMISProperties *)cmisProperties
+                mimeType:(NSString *)mimeType
+             inputStream:(NSInputStream *)inputStream
+             fileManager:(CMISFileManager *)fileManager;
 
 @end

@@ -26,13 +26,10 @@
 #import <objc/runtime.h>
 #import "GDCCustomReadStream.h"
 #import "GDCWriteStream+OutputStream.h"
-//#import "TestFileManager.h"
 #import "CMISConstants.h"
 #import <GD/GDFileSystem.h>
-//#import "CMISFileUtil.h"
 #import "CMISFileManager.h"
 #import "CustomGDCMISFileManager.h"
-//#import "CMISDefaultFileManager.h"
 #import "CustomGDCMISNetworkProvider.h"
 
 @interface SampleTableViewController ()

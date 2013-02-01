@@ -27,12 +27,27 @@
 #import "CMISHttpUploadRequest.h"
 #import "CMISRequest.h"
 #import "CMISSessionParameters.h"
+#import "CustomGDCMISSocketRequest.h"
 
 @interface CustomGDCMISNetworkProvider ()
 + (NSString *)httpMethodString:(CMISHttpRequestMethod) requestMethod;
+@property (nonatomic, readwrite) BOOL supportsDirectXMLStreaming;
 @end
 
 @implementation CustomGDCMISNetworkProvider
+@synthesize supportsDirectXMLStreaming = _supportsDirectXMLStreaming;
+
+- (id)init
+{
+    self = [super init];
+    if (self != nil)
+    {
+        self.supportsDirectXMLStreaming = YES;
+    }
+    return self;
+}
+
+
 
 #pragma CMISNetworkProvider invoker methods
 
@@ -64,6 +79,7 @@ completionBlock:(void (^)(CMISHttpResponse *httpResponse, NSError *error))comple
     }
 }
 
+/*
 - (void)invoke:(NSURL *)url
 withHttpMethod:(CMISHttpRequestMethod)httpRequestMethod
    withSession:(CMISBindingSession *)session
@@ -89,6 +105,73 @@ completionBlock:(void (^)(CMISHttpResponse *httpResponse, NSError *error))comple
         completionBlock(nil, cmisError);
     }
 }
+*/
+
+- (void)invoke:(NSURL *)url
+withHttpMethod:(CMISHttpRequestMethod)httpRequestMethod
+   withSession:(CMISBindingSession *)session
+   inputStream:(NSInputStream *)inputStream
+       headers:(NSDictionary *)additionalHeaders
+ bytesExpected:(unsigned long long)bytesExpected
+      mimeType:(NSString *)mimeType
+    properties:(CMISProperties *)properties
+completionBlock:(void (^)(CMISHttpResponse *, NSError *))completionBlock
+ progressBlock:(void (^)(unsigned long long, unsigned long long))progressBlock
+ requestObject:(CMISRequest *)requestObject
+{
+    NSString *urlString = [url absoluteString];
+    
+    NSString *separator = ([urlString hasPrefix:@"https://"]) ? @"https://" : @"http://";
+    NSArray *urlComponents = [urlString componentsSeparatedByString:separator];
+    NSString *bareUrlString = [urlComponents objectAtIndex:1];
+    NSLog(@"Bare URL is %@", bareUrlString);
+    
+    separator = @"/alfresco";
+    NSArray *apiComponents = [bareUrlString componentsSeparatedByString:separator];
+    NSString *host = [NSString stringWithFormat:@"%@",[apiComponents objectAtIndex:0]];
+    NSLog(@"Host is %@", host);
+    
+    NSMutableString *serviceApiString = [NSMutableString stringWithString:separator];
+    for (int i=1; i<apiComponents.count; i++)
+    {
+        [serviceApiString appendString:[apiComponents objectAtIndex:i]];
+    }
+    NSString *serviceApi = (NSString *)serviceApiString;
+    
+    if ([host hasSuffix:@":80"])
+    {
+        host = [[host componentsSeparatedByString:@":80"] objectAtIndex:0];
+        NSLog(@"reduced the host name to %@", host);
+    }
+    
+    
+    CustomGDCMISSocketRequest *request = [[CustomGDCMISSocketRequest alloc] initWithHostName:host
+                                                                                  serviceAPI:serviceApi
+                                                                                        port:80
+                                                                                      useSSL:NO];
+    [request prepareConnectionWithSession:session
+                                   method:[CustomGDCMISNetworkProvider httpMethodString:httpRequestMethod]
+                                  headers:additionalHeaders
+                              inputStream:inputStream
+                            bytesExpected:bytesExpected
+                                 mimeType:mimeType
+                               properties:properties
+                          completionBlock:completionBlock
+                            progressBlock:progressBlock];
+    
+    
+    if (request)
+    {
+        requestObject.httpRequest = request;
+    }
+    else
+    {
+        NSString *detailedDescription = [NSString stringWithFormat:@"Could not create connection to %@", [url absoluteString]];
+        NSError *cmisError = [CMISErrors createCMISErrorWithCode:kCMISErrorCodeConnection withDetailedDescription:detailedDescription];
+        completionBlock(nil, cmisError);        
+    }
+
+}
 
 
 - (void)invoke:(NSURL *)url
@@ -101,6 +184,38 @@ completionBlock:(void (^)(CMISHttpResponse *httpResponse, NSError *error))comple
  progressBlock:(void (^)(unsigned long long bytesDownloaded, unsigned long long bytesTotal))progressBlock
  requestObject:(CMISRequest *)requestObject
 {
+    /*
+    NSString *urlString = [url absoluteString];
+    
+    NSString *separator = ([urlString hasPrefix:@"https://"]) ? @"https://" : @"http://";
+    NSArray *urlComponents = [urlString componentsSeparatedByString:separator];
+    NSString *bareUrlString = [urlComponents objectAtIndex:1];
+    NSLog(@"Bare URL is %@", bareUrlString);
+    
+    separator = @"/alfresco";
+    NSArray *apiComponents = [bareUrlString componentsSeparatedByString:separator];
+    NSString *host = [NSString stringWithFormat:@"%@",[apiComponents objectAtIndex:0]];
+    NSLog(@"Host is %@", host);
+    
+    NSMutableString *serviceApiString = [NSMutableString stringWithString:separator];
+    for (int i=1; i<apiComponents.count; i++)
+    {
+        [serviceApiString appendString:[apiComponents objectAtIndex:i]];
+    }
+    NSString *serviceApi = (NSString *)serviceApiString;
+    CustomGDCMISSocketRequest *request = [[CustomGDCMISSocketRequest alloc] initWithHostName:host
+                                                                                  serviceAPI:serviceApi
+                                                                                        port:80
+                                                                                      useSSL:NO];
+    [request prepareConnectionWithSession:session
+                                   method:[CustomGDCMISNetworkProvider httpMethodString:httpRequestMethod]
+                                  headers:additionalHeaders
+                              inputStream:inputStream
+                            bytesExpected:bytesExpected
+                          completionBlock:completionBlock
+                            progressBlock:progressBlock];
+    
+     */
     CustomGDCMISHttpRequest *request = [[CustomGDCMISHttpRequest alloc] init];
     BOOL success = [request prepareConnectionWithURL:url
                                                     session:session
