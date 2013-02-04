@@ -24,11 +24,14 @@
 @property (nonatomic, weak) IBOutlet UILabel *uploadLabel;
 @property (nonatomic, weak) IBOutlet UILabel *removeLabel;
 @property (nonatomic, weak) IBOutlet UILabel *downloadLabel;
+@property (nonatomic, weak) IBOutlet UILabel *uploadBigLabel;
 @property (nonatomic, weak) IBOutlet UITableViewCell *uploadCell;
 @property (nonatomic, weak) IBOutlet UITableViewCell *removeCell;
 @property (nonatomic, weak) IBOutlet UITableViewCell *downloadCell;
+@property (nonatomic, weak) IBOutlet UITableViewCell *uploadBigCell;
 - (void)createCMISSession;
 - (void)uploadFile;
 - (void)removeFile;
 - (void)downloadFile;
+- (void)uploadBigFile;
 @end

@@ -77,13 +77,32 @@
                                         <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                                     </tableViewCell>
                                     <tableViewCell contentMode="scaleToFill" selectionStyle="none" hidesAccessoryWhenEditing="NO" indentationLevel="1" indentationWidth="0.0" reuseIdentifier="actionCell" textLabel="109-Yz-bl5" style="IBUITableViewCellStyleDefault" id="aGz-FI-bXk">
-                                        <rect key="frame" x="0.0" y="182" width="320" height="45"/>
+                                        <rect key="frame" x="0.0" y="182" width="320" height="44"/>
                                         <autoresizingMask key="autoresizingMask"/>
                                         <view key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center">
                                             <rect key="frame" x="10" y="0.0" width="300" height="43"/>
                                             <autoresizingMask key="autoresizingMask"/>
                                             <subviews>
                                                 <label opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="left" text="Download file from server" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" id="109-Yz-bl5">
+                                                    <rect key="frame" x="10" y="0.0" width="280" height="43"/>
+                                                    <autoresizingMask key="autoresizingMask"/>
+                                                    <fontDescription key="fontDescription" type="boldSystem" pointSize="17"/>
+                                                    <color key="textColor" cocoaTouchSystemColor="darkTextColor"/>
+                                                    <color key="highlightedColor" red="1" green="1" blue="1" alpha="1" colorSpace="calibratedRGB"/>
+                                                </label>
+                                            </subviews>
+                                            <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
+                                        </view>
+                                        <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                                    </tableViewCell>
+                                    <tableViewCell contentMode="scaleToFill" selectionStyle="none" hidesAccessoryWhenEditing="NO" indentationLevel="1" indentationWidth="0.0" reuseIdentifier="actionCell" textLabel="4Wu-1H-ddM" style="IBUITableViewCellStyleDefault" id="Czc-Xd-E4B">
+                                        <rect key="frame" x="0.0" y="226" width="320" height="45"/>
+                                        <autoresizingMask key="autoresizingMask"/>
+                                        <view key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center">
+                                            <rect key="frame" x="10" y="0.0" width="300" height="43"/>
+                                            <autoresizingMask key="autoresizingMask"/>
+                                            <subviews>
+                                                <label opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="left" text="Upload big test file" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" id="4Wu-1H-ddM">
                                                     <rect key="frame" x="10" y="0.0" width="280" height="43"/>
                                                     <autoresizingMask key="autoresizingMask"/>
                                                     <fontDescription key="fontDescription" type="boldSystem" pointSize="17"/>
@@ -109,6 +128,8 @@
                         <outlet property="downloadLabel" destination="109-Yz-bl5" id="LZA-fW-zM9"/>
                         <outlet property="removeCell" destination="OjK-Hs-SKn" id="AI4-4S-iSK"/>
                         <outlet property="removeLabel" destination="jGQ-3P-hre" id="ho2-82-hTQ"/>
+                        <outlet property="uploadBigCell" destination="Czc-Xd-E4B" id="BmL-mp-HNM"/>
+                        <outlet property="uploadBigLabel" destination="4Wu-1H-ddM" id="gWa-ys-phX"/>
                         <outlet property="uploadCell" destination="0xy-an-gcJ" id="oZ6-33-Il9"/>
                         <outlet property="uploadLabel" destination="Mtx-EC-CZd" id="6mm-ZB-foM"/>
                     </connections>
@@ -147,6 +168,8 @@
                 <relationship kind="outlet" name="downloadLabel" candidateClass="UILabel"/>
                 <relationship kind="outlet" name="removeCell" candidateClass="UITableViewCell"/>
                 <relationship kind="outlet" name="removeLabel" candidateClass="UILabel"/>
+                <relationship kind="outlet" name="uploadBigCell" candidateClass="UITableViewCell"/>
+                <relationship kind="outlet" name="uploadBigLabel" candidateClass="UILabel"/>
                 <relationship kind="outlet" name="uploadCell" candidateClass="UITableViewCell"/>
                 <relationship kind="outlet" name="uploadLabel" candidateClass="UILabel"/>
             </relationships>

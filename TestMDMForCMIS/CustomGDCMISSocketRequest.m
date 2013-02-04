@@ -12,6 +12,7 @@
 #import "CMISConstants.h"
 #import "CMISDateUtil.h"
 
+NSUInteger BUFFERSIZE = 524280;//must be integer-divisible by 3
 NSString * HTTPSPACE = @" ";
 NSString * HTTPCRLF = @"\r\n";
 NSString * HTTPPROTOCOL = @"HTTP/1.1";
@@ -45,7 +46,7 @@ NSString * HTTPLASTCHUNK = @"0\r\n";
 + (NSData *)xmlBodyOpenElementsWithMimeType:(NSString *)mimeType;
 + (NSData *)xmlBodyCloseElements;
 + (NSString *)extensionsFromChildren:(NSArray *)children;
-- (NSUInteger)lengthOfEncodedStream;
++ (NSUInteger)base64EncodedLength:(NSUInteger)contentSize;
 @end
 
 
@@ -112,73 +113,35 @@ NSString * HTTPLASTCHUNK = @"0\r\n";
 
 
 #pragma Socket Delegate methods
-
+/**
+ Ok - so this requires some explanation:
+ The POST method requires a Content-length entry in the HTTP request header, where the content length is the number of bytes including the base 64 encoded content plus the XML headers.
+ The base64 encoded data length can be calculated upfront, if the size of the content (e.g. file size) is known. I.e. if the bytesExpected value passed into the class is != 0.
+ The size of the XML headers can also be calculated.
+ 
+ In case we CAN calculate the size upfront, we write the data to the socket in 524280 sized buffers. Please note, whatever buffersize you choose, it must be divisible by 3 (size % 3 == 0). Otherwise you will write more base64 encoded data to the stream than you calculated for the Content-length HTTP header value. Why? Because base64 encoding will write 4 bytes for each 3, padding any extra bytes in case (size % 3 != 0)
+ 
+ We also cater for the case where the file/content size is NOT known upfront. In this case we have no other option but load the content in memory so we can calculate the size, then write the HTTP request header, following by writing the buffer to the Socket stream. 
+ */
 - (void)onOpen:(CustomGDCMISSocketRequest *)currentSocket
 {
-    NSLog(@"in onOpen. request method is %@ and serviceAPI is %@. The host is %@", self.requestMethod, self.serviceApi, self.host);
     if (!self.receivedData)
     {
         self.receivedData = [NSMutableData data];
     }
-    /*
     
     httpResponseMessage = CFHTTPMessageCreateEmpty(kCFAllocatorDefault, FALSE);
-    NSString *header = [self headerForRequest];
-    [currentSocket.writeStream write:[header UTF8String]];
-    [currentSocket write];
-    
-    NSLog(@"The header is :\n%@", header);
-    NSMutableData *requestMessageData = [NSMutableData data];
-    [requestMessageData appendData:[CustomGDCMISSocketRequest xmlHeader:self.properties]];
-    [requestMessageData appendData:[CustomGDCMISSocketRequest xmlBodyOpenElementsWithMimeType:self.mimeType]];
-
-    NSString *hexLength = [NSString stringWithFormat:@"%x",requestMessageData.length];
-    [currentSocket.writeStream write:[hexLength UTF8String]];
-    [currentSocket.writeStream write:[HTTPCRLF UTF8String]];
-    [currentSocket.writeStream writeData:requestMessageData];
-    [currentSocket.writeStream write:[HTTPCRLF UTF8String]];
-    [currentSocket write];
-    while ([self.inputStream hasBytesAvailable])
-    {
-        NSMutableData *chunkData = [NSMutableData dataWithCapacity:8192];
-        NSInteger bytes = [self.inputStream read:chunkData.mutableBytes maxLength:8192];
-        if (0 < bytes)
-        {
-            [chunkData setLength:bytes];
-            NSData *encoded = [CMISBase64Encoder dataByEncodingText:chunkData];
-            hexLength = [NSString stringWithFormat:@"%x", encoded.length];
-            NSLog(@"writing %@ (hex) bytes to chunk", hexLength);
-            [currentSocket.writeStream write:[hexLength UTF8String]];
-            [currentSocket.writeStream write:[HTTPCRLF UTF8String]];
-            [currentSocket.writeStream writeData:encoded];
-            [currentSocket.writeStream write:[HTTPCRLF UTF8String]];
-            [currentSocket write];
-        }
-    }
-    
-    NSMutableData *bodyEndData = [NSMutableData data];
-    [bodyEndData appendData:[CustomGDCMISSocketRequest xmlBodyCloseElements]];
-    [bodyEndData appendData:[CustomGDCMISSocketRequest xmlProperties:self.properties]];
-    hexLength = [NSString stringWithFormat:@"%x",bodyEndData.length];
-    [currentSocket.writeStream write:[hexLength UTF8String]];
-    [currentSocket.writeStream write:[HTTPCRLF UTF8String]];
-    [currentSocket.writeStream writeData:bodyEndData];
-    [currentSocket.writeStream write:[HTTPCRLF UTF8String]];
-    [currentSocket.writeStream write:[HTTPLASTCHUNK UTF8String]];
-    [currentSocket write];
-     */
-    
     if (0 < self.bytesExpected)
     {
-        NSLog(@"***** WE ARE WRITING IN A BUFFERED MANNER. BYTE SIZE IS %d ******", self.bytesExpected);
         NSData *xmlHeader = [CustomGDCMISSocketRequest xmlHeader:self.properties];
         NSData *xmlBodyOpen = [CustomGDCMISSocketRequest xmlBodyOpenElementsWithMimeType:self.mimeType];
         NSData *xmlBodyClose = [CustomGDCMISSocketRequest xmlBodyCloseElements];
         NSData *xmlProperties = [CustomGDCMISSocketRequest xmlProperties:self.properties];
         
         NSUInteger length = xmlHeader.length + xmlBodyClose.length + xmlBodyOpen.length + xmlProperties.length;
-        length += [self lengthOfEncodedStream];
-        httpResponseMessage = CFHTTPMessageCreateEmpty(kCFAllocatorDefault, FALSE);
+        NSUInteger realLength = length;
+
+        length += [CustomGDCMISSocketRequest base64EncodedLength:self.bytesExpected];
         NSString *header = [self headerWithContentLength:length];
         [currentSocket.writeStream write:[header UTF8String]];
         [currentSocket write];
@@ -189,49 +152,60 @@ NSString * HTTPLASTCHUNK = @"0\r\n";
         
         while ([self.inputStream hasBytesAvailable])
         {
-            const NSUInteger bufferSize = 8192;
-            uint8_t buffer[bufferSize];
-            NSInteger bytes = [self.inputStream read:buffer maxLength:bufferSize];
-            if (0 < bytes)
+            @autoreleasepool
             {
-                NSData *chunkData = [NSData dataWithBytesNoCopy:buffer length:bytes];
-                NSLog(@"**** read in data are %@ ****",[[NSString alloc] initWithData:chunkData encoding:NSUTF8StringEncoding]);
-                NSData *encoded = [CMISBase64Encoder dataByEncodingText:chunkData];
-                [currentSocket.writeStream writeData:encoded];
-                [currentSocket write];
+                uint8_t buffer[BUFFERSIZE];
+                NSInteger bytes = [self.inputStream read:buffer maxLength:BUFFERSIZE];
+                if (0 < bytes)
+                {
+                    NSData *chunkData = [NSData dataWithBytes:buffer length:bytes];
+                    NSData *encoded = [CMISBase64Encoder dataByEncodingText:chunkData];
+                    [currentSocket.writeStream writeData:encoded];
+                    [currentSocket write];
+                    realLength += encoded.length;
+                }
             }
         }
-        
-        
+                
         [currentSocket.writeStream writeData:xmlBodyClose];
         [currentSocket.writeStream writeData:xmlProperties];
         [currentSocket write];
-        
+
+        if (length > realLength)
+        {
+            NSUInteger diff = length - realLength;
+            for (int i = 0; i < diff; ++i)
+            {
+                [currentSocket.writeStream write:[HTTPSPACE UTF8String]];
+            }
+        }
+        [currentSocket write];
         
     }
     else
     {
-        NSLog(@"<<<<<<<<< WE ARE WRITING THE WHOLE LOT IN ONE GO >>>>>>>>");
         NSMutableData *requestMessageData = [NSMutableData data];
         [requestMessageData appendData:[CustomGDCMISSocketRequest xmlHeader:self.properties]];
         [requestMessageData appendData:[CustomGDCMISSocketRequest xmlBodyOpenElementsWithMimeType:self.mimeType]];
         while ([self.inputStream hasBytesAvailable])
         {
-            const NSUInteger bufferSize = 8192;
-            uint8_t buffer[bufferSize];
-            NSInteger bytes = [self.inputStream read:buffer maxLength:bufferSize];
-            if (0 < bytes)
+            @autoreleasepool
             {
-                NSData *chunkData = [NSData dataWithBytesNoCopy:buffer length:bytes];
-                NSData *encoded = [CMISBase64Encoder dataByEncodingText:chunkData];
-                [requestMessageData appendData:encoded];
+                const NSUInteger bufferSize = BUFFERSIZE;
+                uint8_t buffer[bufferSize];
+                NSInteger bytes = [self.inputStream read:buffer maxLength:bufferSize];
+                if (0 < bytes)
+                {
+                    NSData *chunkData = [NSData dataWithBytes:buffer length:bytes];
+                    NSData *encoded = [CMISBase64Encoder dataByEncodingText:chunkData];
+                    [requestMessageData appendData:encoded];
+                }
             }
         }
         [requestMessageData appendData:[CustomGDCMISSocketRequest xmlBodyCloseElements]];
         [requestMessageData appendData:[CustomGDCMISSocketRequest xmlProperties:self.properties]];
         
         NSUInteger messageLength = requestMessageData.length;
-        httpResponseMessage = CFHTTPMessageCreateEmpty(kCFAllocatorDefault, FALSE);
         NSString *header = [self headerWithContentLength:messageLength];
         [currentSocket.writeStream write:[header UTF8String]];
         [currentSocket.writeStream writeData:requestMessageData];
@@ -241,20 +215,20 @@ NSString * HTTPLASTCHUNK = @"0\r\n";
     
 }
 
-- (NSUInteger)lengthOfEncodedStream
++ (NSUInteger)base64EncodedLength:(NSUInteger)contentSize
 {
-    if (0 == self.bytesExpected)
+    if (0 == contentSize)
     {
         return 0;
     }
-    NSUInteger length = (4 * ((self.bytesExpected / 3) + (1 - (3 - (self.bytesExpected % 3)) / 3)));
-    return length;
+    NSUInteger adjustedThirdPartOfSize = (contentSize / 3) + ( (0 == contentSize % 3 ) ? 0 : 1 );
+    
+    return 4 * adjustedThirdPartOfSize;
 }
 
 
 - (void)onRead:(CustomGDCMISSocketRequest *)currentSocket
 {
-    NSLog(@"in onRead");
     NSData *returnedData = [currentSocket.readStream unreadData];
     
     const unsigned char *bytes = [returnedData bytes];
@@ -263,10 +237,6 @@ NSString * HTTPLASTCHUNK = @"0\r\n";
     {
         NSLog(@"we got an error appending the bytes to the http message");
     }
-    else
-    {
-        NSLog(@"We are appending %d bytes to the buffer",returnedData.length);
-    }    
 }
 
 - (void)onClose:(CustomGDCMISSocketRequest *)currentSocket
@@ -278,7 +248,6 @@ NSString * HTTPLASTCHUNK = @"0\r\n";
     {
         statusCode_32 =  CFHTTPMessageGetResponseStatusCode(httpResponseMessage);
         statusline = CFHTTPMessageCopyResponseStatusLine(httpResponseMessage);
-        NSLog(@"message header is complete and the status code is %ld", statusCode_32);
         serializedData = CFHTTPMessageCopyBody(httpResponseMessage);
         NSData *data = (__bridge_transfer NSData*)serializedData;
         [self.receivedData appendData:data];
@@ -286,7 +255,6 @@ NSString * HTTPLASTCHUNK = @"0\r\n";
     
     NSString *responseDataString = [[NSString alloc] initWithData:self.receivedData encoding:NSUTF8StringEncoding];
     NSArray *crlfComponents = [responseDataString componentsSeparatedByString:HTTPCRLF];
-    NSLog(@"THe number of crlf components is %d",crlfComponents.count);
     NSMutableData *cleanedData = [NSMutableData data];
     for (int i = 0 ; i < crlfComponents.count; ++i)
     {
@@ -296,10 +264,8 @@ NSString * HTTPLASTCHUNK = @"0\r\n";
             [cleanedData appendData:[resultingString dataUsingEncoding:NSUTF8StringEncoding]];
         }
     }
-    NSLog(@"the cleaned string is :\n%@",[[NSString alloc] initWithData:cleanedData encoding:NSUTF8StringEncoding]);
     
     NSString *statusMessage = (__bridge_transfer NSString *)statusline;
-//    NSLog(@"in onClose. The amount of data we received is %d. The data string is\n %@", self.receivedData.length, [[NSString alloc] initWithData:self.receivedData encoding:NSUTF8StringEncoding]);
     
     if (200 <= statusCode_32 && 299 >= statusCode_32)
     {

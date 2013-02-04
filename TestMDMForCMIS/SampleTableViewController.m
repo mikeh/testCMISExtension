@@ -32,6 +32,10 @@
 #import "CustomGDCMISFileManager.h"
 #import "CustomGDCMISNetworkProvider.h"
 
+static NSString * kPDFMIMETYPE = @"application/pdf";
+static NSString * kTEXTMIMETYPE = @"text/plain";
+
+
 @interface SampleTableViewController ()
 @property (nonatomic, strong) CMISSession * session;
 @property (nonatomic, strong) CMISFolder *rootFolder;
@@ -42,6 +46,7 @@
 @property BOOL canRemoveCMISDoc;
 - (void)deselectRow;
 - (NSString *)prepareTestFileForUpload;
+- (NSString *)prepareBigTestFileForUpload;
 @end
 
 @implementation SampleTableViewController
@@ -58,6 +63,8 @@
 @synthesize canRemoveCMISDoc = _canRemoveCMISDoc;
 @synthesize testDoc = _testDoc;
 @synthesize request = _request;
+@synthesize uploadBigCell = _uploadBigCell;
+@synthesize uploadBigLabel = _uploadBigLabel;
 
 - (void)viewDidLoad
 {
@@ -65,6 +72,7 @@
     self.uploadLabel.textColor = [UIColor lightGrayColor];
     self.removeLabel.textColor = [UIColor lightGrayColor];
     self.downloadLabel.textColor = [UIColor lightGrayColor];
+    self.uploadBigLabel.textColor = [UIColor lightGrayColor];
     self.canRemoveCMISDoc = NO;
     self.canActionCMISDoc = NO;
 
@@ -102,6 +110,9 @@
             break;
         case 3:
             [self downloadFile];
+            break;
+        case 4:
+            [self uploadBigFile];
             break;
         default:
             break;
@@ -192,8 +203,11 @@
                     [alert show];
                     NSLog(@"We succeeded in getting the root folder for the session");
                     self.uploadLabel.textColor = [UIColor blackColor];
+                    self.uploadBigLabel.textColor = [UIColor blackColor];
                     self.uploadCell.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
                     self.uploadCell.selectionStyle = UITableViewCellSelectionStyleGray;
+                    self.uploadBigCell.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
+                    self.uploadBigCell.selectionStyle = UITableViewCellSelectionStyleGray;
                     self.downloadLabel.textColor = [UIColor blackColor];
                     self.downloadCell.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
                     self.downloadCell.selectionStyle = UITableViewCellSelectionStyleGray;
@@ -232,7 +246,7 @@
             unsigned long long bytesExpected = myStat.fileLen;
             NSLog(@"the expected file length to be uploaded is %lld",myStat.fileLen);
             [self.rootFolder createDocumentFromInputStream:inputStream
-                                              withMimeType:@"text/plain"
+                                              withMimeType:kTEXTMIMETYPE
                                             withProperties:documentProperties
                                              bytesExpected:bytesExpected
                                            completionBlock:^(NSString *objectId, NSError *error){
@@ -304,6 +318,82 @@
     }
     
 }
+
+- (void)uploadBigFile
+{
+    if (!self.canActionCMISDoc)
+    {
+        return;
+    }
+    NSLog(@"We are in uploadBigFile");
+    NSString *filePath = [self prepareBigTestFileForUpload];
+    if (filePath && self.rootFolder)
+    {
+        NSURL *fileURL = [NSURL URLWithString:filePath];
+        NSString *documentName = [fileURL lastPathComponent];
+        NSLog(@"trying to upload file %@",documentName);
+        NSMutableDictionary *documentProperties = [NSMutableDictionary dictionary];
+        [documentProperties setObject:documentName forKey:kCMISPropertyName];
+        [documentProperties setObject:kCMISPropertyObjectTypeIdValueDocument forKey:kCMISPropertyObjectTypeId];
+        NSError *error = nil;
+        GDCReadStream *inputStream = [GDFileSystem getReadStream:filePath error:&error];
+        GDFileStat myStat;
+        NSError *outError = nil;
+        BOOL success = [GDFileSystem getFileStat:filePath to:&myStat error:&outError];
+        if (inputStream && success)
+        {
+            unsigned long long bytesExpected = myStat.fileLen;
+            NSLog(@"the expected file length to be uploaded is %lld",myStat.fileLen);
+            [self.rootFolder createDocumentFromInputStream:inputStream
+                                              withMimeType:kPDFMIMETYPE
+                                            withProperties:documentProperties
+                                             bytesExpected:bytesExpected
+                                           completionBlock:^(NSString *objectId, NSError *error){
+                                               if (nil == objectId)
+                                               {
+                                                   UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Error"
+                                                                                                   message:@"Failed to upload test doc"
+                                                                                                  delegate:self
+                                                                                         cancelButtonTitle:@"Ok"
+                                                                                         otherButtonTitles: nil];
+                                                   [alert show];
+                                                   NSLog(@"CMIS upload of test document failed. Error is %d with message %@", [error code], [error localizedDescription]);
+                                                   self.testDocId = nil;
+                                               }
+                                               else
+                                               {
+                                                   UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Success"
+                                                                                                   message:@"The test doc was uploaded successfully"
+                                                                                                  delegate:self
+                                                                                         cancelButtonTitle:@"Ok"
+                                                                                         otherButtonTitles: nil];
+                                                   [alert show];
+                                                   NSLog(@"Upload succeeded and the object ID is %@", objectId);
+                                                   self.testDocId = objectId;
+                                                   self.removeCell.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
+                                                   self.removeCell.selectionStyle = UITableViewCellSelectionStyleGray;
+                                                   self.removeLabel.textColor = [UIColor blackColor];
+                                                   self.canRemoveCMISDoc = YES;
+                                               }
+                                           }
+                                             progressBlock:^(unsigned long long bytesUploaded, unsigned long long bytesTotal){}];
+        }
+        else
+        {
+            NSLog(@"either the input stream is nil or we couldn't get the file stats");
+            if (error)
+            {
+                NSLog(@"input stream is nil. Error code is %d and message %@",[error code], [error localizedDescription]);
+            }
+            if(outError)
+            {
+                NSLog(@"file stats error. Error code is %d and message %@",[outError code], [outError localizedDescription]);
+            }
+        }
+    }
+    
+}
+
 
 - (void)removeFile
 {
@@ -485,6 +575,49 @@
     return tmpPath;
 }
 
+- (NSString *)prepareBigTestFileForUpload
+{
+    NSLog(@"We are in prepareBigTestFileForUpload");
+    NSString *filePath = [[NSBundle bundleForClass:[self class]] pathForResource:@"cmis-spec-v1.0.pdf" ofType:nil];
+    NSFileHandle *fileHandle = [NSFileHandle fileHandleForUpdatingAtPath:filePath];
+    NSData *content = [fileHandle readDataToEndOfFile];
+    
+    NSDateFormatter *formatter = [[NSDateFormatter alloc] init];
+    [formatter setDateFormat: @"yyyy-MM-dd'T'HH-mm-ss-Z'"];
+    NSString *documentName = [NSString stringWithFormat:@"cmis-spec_%@.pdf", [formatter stringFromDate:[NSDate date]]];
+    
+    if (content && 0 < [content length])
+    {
+        NSError *error = nil;
+        GDCWriteStream *writeStream = [GDFileSystem getWriteStream:documentName appendmode:NO error:&error];
+        if (writeStream)
+        {
+            if ([writeStream hasSpaceAvailable])
+            {
+                NSUInteger bufferSize = [content length];
+                uint8_t buffer[bufferSize];
+                [content getBytes:buffer length:bufferSize];
+                if ([writeStream write:(const uint8_t *)(&buffer) maxLength:bufferSize] != -1 )
+                {
+                    NSLog(@"Managed to write content of file into secure container");
+                }
+                else
+                {
+                    NSLog(@"failed to write data into secure container");
+                }
+            }
+            [writeStream close];
+        }
+    }
+    else
+    {
+        NSLog(@"We were not able to create a valid GDCWriteStream instance for file %@", documentName);
+    }
+    
+    [fileHandle closeFile];
+    return documentName;
+    
+}
 
 - (NSString *)prepareTestFileForUpload
 {

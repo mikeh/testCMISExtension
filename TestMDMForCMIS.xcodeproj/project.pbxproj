@@ -31,6 +31,7 @@
 		4E0E13751684703D00AF36AB /* GDCCustomReadStream.m in Sources */ = {isa = PBXBuildFile; fileRef = 4E0E13741684703D00AF36AB /* GDCCustomReadStream.m */; };
 		4E10AC1416BAA11E00E2287E /* CustomGDCMISSocketRequest.m in Sources */ = {isa = PBXBuildFile; fileRef = 4E10AC1316BAA11E00E2287E /* CustomGDCMISSocketRequest.m */; };
 		4E38805E169D84AA004BB186 /* SampleTableViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 4E38805D169D84AA004BB186 /* SampleTableViewController.m */; };
+		4E94B9DC16BFB00E00324AC8 /* cmis-spec-v1.0.pdf in Resources */ = {isa = PBXBuildFile; fileRef = 4E94B9DB16BFB00E00324AC8 /* cmis-spec-v1.0.pdf */; };
 		4E96A57F16835319001AABEB /* GDCWriteStream+OutputStream.m in Sources */ = {isa = PBXBuildFile; fileRef = 4E96A57E16835318001AABEB /* GDCWriteStream+OutputStream.m */; };
 		4EB9893316838297007C42E4 /* test_file.txt in Resources */ = {isa = PBXBuildFile; fileRef = 4E96A56E16831AEB001AABEB /* test_file.txt */; };
 		4EED485716B2DAAF00A0BAAC /* CustomGDCMISNetworkProvider.m in Sources */ = {isa = PBXBuildFile; fileRef = 4EED485616B2DAAF00A0BAAC /* CustomGDCMISNetworkProvider.m */; };
@@ -154,6 +155,7 @@
 		4E38805D169D84AA004BB186 /* SampleTableViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SampleTableViewController.m; sourceTree = "<group>"; };
 		4E3E14CA16B047770057CE22 /* CMISFileManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CMISFileManager.h; sourceTree = "<group>"; };
 		4E3E14CB16B047770057CE22 /* CMISPlaceholderFileManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CMISPlaceholderFileManager.h; sourceTree = "<group>"; };
+		4E94B9DB16BFB00E00324AC8 /* cmis-spec-v1.0.pdf */ = {isa = PBXFileReference; lastKnownFileType = image.pdf; path = "cmis-spec-v1.0.pdf"; sourceTree = "<group>"; };
 		4E96A56E16831AEB001AABEB /* test_file.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = test_file.txt; sourceTree = "<group>"; };
 		4E96A57D16835318001AABEB /* GDCWriteStream+OutputStream.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "GDCWriteStream+OutputStream.h"; sourceTree = "<group>"; };
 		4E96A57E16835318001AABEB /* GDCWriteStream+OutputStream.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "GDCWriteStream+OutputStream.m"; sourceTree = "<group>"; };
@@ -253,6 +255,7 @@
 		4E0076DE1681B9E800908DE9 /* Supporting Files */ = {
 			isa = PBXGroup;
 			children = (
+				4E94B9DB16BFB00E00324AC8 /* cmis-spec-v1.0.pdf */,
 				4E96A56E16831AEB001AABEB /* test_file.txt */,
 				4E0077671682239500908DE9 /* env-cfg.plist */,
 				4E0076FD1681BA0000908DE9 /* chemistry_tm_logo_small.png */,
@@ -429,6 +432,7 @@
 				4E0076F41681B9E800908DE9 /* GDAssets.bundle in Resources */,
 				4E0076FE1681BA0000908DE9 /* chemistry_tm_logo_small.png in Resources */,
 				4E0077681682239500908DE9 /* env-cfg.plist in Resources */,
+				4E94B9DC16BFB00E00324AC8 /* cmis-spec-v1.0.pdf in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
