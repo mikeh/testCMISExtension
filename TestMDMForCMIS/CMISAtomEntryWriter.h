@@ -14,18 +14,15 @@
 
 
 #import <Foundation/Foundation.h>
-#import "CMISFileManager.h"
 @class CMISProperties;
 
 
 @interface CMISAtomEntryWriter : NSObject
 
-//@property (nonatomic, strong) NSString *contentFilePath;
+@property (nonatomic, strong) NSString *contentFilePath;
 @property (nonatomic, strong) NSInputStream *inputStream;
 @property (nonatomic, strong) NSString *mimeType;
 @property (nonatomic, strong) CMISProperties *cmisProperties;
-@property (nonatomic, strong) CMISFileManager *fileManager;
-
 /**
  * If YES: the xml will be created and stored fully in-memory.
  * If NO: the xml will be streamed to a file on disk.
@@ -35,48 +32,15 @@
 @property BOOL generateXmlInMemory;
 
 /**
-* Generates the atom entry XML for the given properties on this class.
-*
-* NOTE: if <code>generateXmlInMemory</code> boolean is set to NO, a filepath pointing to a file
-* containing the generated atom entry is returned.
-* Callers are responsible to remove the file again if not needed anymore.
-*
-* If set to YES, the return value of this method is the XML is its whole.
-*
-*/
-//- (NSString *)generateAtomEntryXml;
-
-/*
- @return raw XML data as NSString
+ * Generates the atom entry XML for the given properties on this class.
+ *
+ * NOTE: if <code>generateXmlInMemory</code> boolean is set to NO, a filepath pointing to a file
+ * containing the generated atom entry is returned.
+ * Callers are responsible to remove the file again if not needed anymore.
+ *
+ * If set to YES, the return value of this method is the XML is its whole.
+ *
  */
-- (NSString *)atomEntryXmlString;
-
-/*
- @return tmp file path with XML data including base 64 encoded content data
- */
-- (NSString *)atomEntryXmlFilePath;
-
-/*
- creates an instance of CMISAtomEntryWriter.
- XML data will be written to a string in memory.
- The XML data are obtained using
- atomEntryXmlString
- Do not use atomEntryXmlFilePath with this initialiser.
- @param cmisProperties - the properties used to create the atom pub XML string
- */
-- (id)initWithProperties:(CMISProperties *)cmisProperties;
-
-/*
- creates an instance of CMISAtomEntryWriter.
- XML and base 64 encoded content data are written to a temporary file.
- The temporary XML file is obtained using
- atomEntryXmlFilePath
- Do not use atomEntryXmlString with this initialiser.
- @param cmisProperties - the properties used to create the atom pub XML string
- */
-- (id)initWithProperties:(CMISProperties *)cmisProperties
-                mimeType:(NSString *)mimeType
-             inputStream:(NSInputStream *)inputStream
-             fileManager:(CMISFileManager *)fileManager;
+- (NSString *)generateAtomEntryXml;
 
 @end

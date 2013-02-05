@@ -38,9 +38,18 @@
                           method:(NSString *)httpMethod
                             body:(NSData *)body
                          headers:(NSDictionary *)headers
-                     inputStream:(GDCReadStream *)inputStream
+                     inputStream:(NSInputStream *)inputStream
                     outputStream:(GDCWriteStream *)outputStream
                    bytesExpected:(unsigned long long)expected
                  completionBlock:(void (^)(CMISHttpResponse *httpResponse, NSError *error))completionBlock
                    progressBlock:(void (^)(unsigned long long bytesDownloaded, unsigned long long bytesTotal))progressBlock;
+
+- (BOOL)prepareConnectionWithURL:(NSURL *)url
+                         session:(CMISBindingSession *)session
+                          method:(NSString *)httpMethod
+                            body:(NSData *)body
+                         headers:(NSDictionary *)headers
+                        filePath:(NSString *)filePath
+                   bytesExpected:(unsigned long long)expected
+                 completionBlock:(void (^)(CMISHttpResponse *httpResponse, NSError *error))completionBlock;
 @end

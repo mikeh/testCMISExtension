@@ -28,12 +28,13 @@
 #import "GDCWriteStream+OutputStream.h"
 #import "CMISConstants.h"
 #import <GD/GDFileSystem.h>
-#import "CMISFileManager.h"
-#import "CustomGDCMISFileManager.h"
 #import "CustomGDCMISNetworkProvider.h"
 
+NSString * kMyOwnFolder = @"workspace://SpacesStore/f4f16957-5287-46e4-b405-0aa64bbddb7e";
+NSString * kTestfileForDownload = @"workspace://SpacesStore/15e47b2f-b5af-453e-b194-69a715aef3f2";
 static NSString * kPDFMIMETYPE = @"application/pdf";
 static NSString * kTEXTMIMETYPE = @"text/plain";
+static NSString * kTMPDIRNAME = @"/tmp";
 
 
 @interface SampleTableViewController ()
@@ -42,29 +43,17 @@ static NSString * kTEXTMIMETYPE = @"text/plain";
 @property (nonatomic, strong) CMISDocument *testDoc;
 @property (nonatomic, strong) CMISRequest *request;
 @property (nonatomic, strong) NSString *testDocId;
+@property (nonatomic, strong) NSString *downloadPath;
 @property BOOL canActionCMISDoc;
 @property BOOL canRemoveCMISDoc;
+@property BOOL isTSServer;
 - (void)deselectRow;
 - (NSString *)prepareTestFileForUpload;
 - (NSString *)prepareBigTestFileForUpload;
+- (void)downloadFileFromTS;
 @end
 
 @implementation SampleTableViewController
-@synthesize uploadLabel = _uploadLabel;
-@synthesize removeLabel = _removeLabel;
-@synthesize downloadLabel = _downloadLabel;
-@synthesize uploadCell = _uploadCell;
-@synthesize removeCell = _removeCell;
-@synthesize downloadCell = _downloadCell;
-@synthesize session = _session;
-@synthesize rootFolder = _rootFolder;
-@synthesize testDocId = _testDocId;
-@synthesize canActionCMISDoc = _canActionCMISDoc;
-@synthesize canRemoveCMISDoc = _canRemoveCMISDoc;
-@synthesize testDoc = _testDoc;
-@synthesize request = _request;
-@synthesize uploadBigCell = _uploadBigCell;
-@synthesize uploadBigLabel = _uploadBigLabel;
 
 - (void)viewDidLoad
 {
@@ -109,8 +98,17 @@ static NSString * kTEXTMIMETYPE = @"text/plain";
             [self removeFile];
             break;
         case 3:
-            [self downloadFile];
+        {
+            if (self.isTSServer)
+            {
+                [self downloadFileFromTS];
+            }
+            else
+            {                
+                [self downloadFile];
+            }
             break;
+        }
         case 4:
             [self uploadBigFile];
             break;
@@ -128,43 +126,32 @@ static NSString * kTEXTMIMETYPE = @"text/plain";
     NSDictionary *environmentsDict = [[NSDictionary alloc] initWithContentsOfFile:envsPListPath];
     NSArray *environmentArray = [environmentsDict objectForKey:@"environments"];
     
-    NSDictionary *environmentKeys = [environmentArray objectAtIndex:0];
+    NSDictionary *environmentKeys = [environmentArray objectAtIndex:1];
     NSString *url = [environmentKeys valueForKey:@"url"];
     NSString *repositoryId = [environmentKeys valueForKey:@"repositoryId"];
     NSString *username = [environmentKeys valueForKey:@"username"];
     NSString *password = [environmentKeys valueForKey:@"password"];
+
+    if ([url hasPrefix:@"https://ts"])
+    {
+        self.isTSServer = YES;
+    }
+    else
+    {
+        self.isTSServer = NO;
+    }
     
     CMISSessionParameters *parameters = [[CMISSessionParameters alloc] initWithBindingType:CMISBindingTypeAtomPub];
     parameters.username = username;
     parameters.password = password;
     parameters.repositoryId = repositoryId;
     parameters.atomPubUrl = [NSURL URLWithString:url];
-    /**
-     File IO setting. We need to have the test manager defined here
-    CMISFileManager *fileManager = [[CMISFileManager alloc] initWithClassName:@"CustomGDCMISFileManager"];
-    parameters.fileManager = fileManager;
-     */
-    
-    /*
-    NSMutableDictionary *paramExtensions = [NSMutableDictionary dictionary];
-    const char * fileManagerName = class_getName([TestFileManager class]);
-    [paramExtensions setObject:[NSString stringWithUTF8String:fileManagerName] forKey:kCMISSessionParameterCustomFileManager];
-    [parameters setObject:paramExtensions forKey:kCMISSessionParameterCustomFileIO];
-     */
-
 
     /**
      Network IO setting. We need to provide the HTTP invoker here
      */
     CustomGDCMISNetworkProvider *networkProvider = [[CustomGDCMISNetworkProvider alloc] init];
     parameters.networkProvider = networkProvider;
-
-    /*
-    NSMutableDictionary *networkExtension = [NSMutableDictionary dictionary];
-    const char * networkClassName = class_getName([GDHttpUtil class]);
-    [networkExtension setObject:[NSString stringWithUTF8String:networkClassName] forKey:kCMISSessionParameterCustomRequest];
-    [parameters setObject:networkExtension forKey:kCMISSessionParameterCustomNetworkIO];
-     */
     
     [CMISSession connectWithSessionParameters:parameters completionBlock:^(CMISSession *session, NSError *error){
         if (nil == session)
@@ -212,7 +199,25 @@ static NSString * kTEXTMIMETYPE = @"text/plain";
                     self.downloadCell.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
                     self.downloadCell.selectionStyle = UITableViewCellSelectionStyleGray;
                     self.canActionCMISDoc = YES;
-                    self.rootFolder = rootFolder;
+                    if (self.isTSServer)
+                    {
+                        [self.session retrieveObject:kMyOwnFolder completionBlock:^(CMISObject *folderObject, NSError *folderError){
+                            if (nil == folderObject)
+                            {
+                                NSLog(@"!!!!!!!!! An Error occurred with obtaining the CMIS object. Error code is %d, error message is %@",[folderError code], [folderError localizedDescription]);
+                            }
+                            else
+                            {
+                                NSLog(@"****** we successfully loaded the folder **********");
+                                self.rootFolder = (CMISFolder *)folderObject;
+                            }
+                        }];
+                    }
+                    else
+                    {
+                        self.rootFolder = rootFolder;                        
+                    }
+                    
                 }
             }];
         }
@@ -476,6 +481,84 @@ static NSString * kTEXTMIMETYPE = @"text/plain";
     
 }
 
+- (void)downloadFileFromTS
+{
+    if (!self.canActionCMISDoc)
+    {
+        return;
+    }
+    if (self.session)
+    {
+        [self.session retrieveObject:kTestfileForDownload completionBlock:^(CMISObject *object, NSError *error){
+            if (nil == object)
+            {
+                UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Error"
+                                                                message:@"Couldn't download test file"
+                                                               delegate:self
+                                                      cancelButtonTitle:@"Ok"
+                                                      otherButtonTitles: nil];
+                [alert show];
+                NSLog(@"An error occurred when downloading the test file. Error code is %d and message is %@", [error code], [error localizedDescription]);
+                
+            }
+            else
+            {
+                CMISDocument *serverDoc = (CMISDocument *)object;
+                NSError *writeError = nil;
+                NSString *filePath = @"versionedtext.text";
+                GDCWriteStream *outputStream = [GDFileSystem getWriteStream:filePath appendmode:NO error:&writeError];
+                NSStreamStatus status = outputStream.streamStatus;
+                NSLog(@"stream status is %d", status);
+                [serverDoc downloadContentToOutputStream:outputStream completionBlock:^(NSError *downloadError){
+                    if (downloadError)
+                    {
+                        [outputStream close];
+                        UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Error"
+                                                                        message:@"Couldn't download content of test document"
+                                                                       delegate:self
+                                                              cancelButtonTitle:@"Ok"
+                                                              otherButtonTitles: nil];
+                        [alert show];
+                        
+                    }
+                    else
+                    {
+                        UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Success"
+                                                                        message:@"we downloaded the file versioned-quote.txt"
+                                                                       delegate:self
+                                                              cancelButtonTitle:@"Ok"
+                                                              otherButtonTitles: nil];
+                        [alert show];
+                        [outputStream close];
+                        GDFileStat stats;
+                        NSError *error = nil;
+                        BOOL success = [GDFileSystem getFileStat:filePath to:&stats error:&error];
+                        if (!success)
+                        {
+                            NSLog(@"Somehow we can't get the file stats to the downloaded file");
+                        }
+                        else
+                        {
+                            NSInteger offset = stats.fileLen;
+                            NSLog(@"the file size is %d", offset);
+                            NSError *readError = nil;
+                            NSData *data = [GDFileSystem readFromFile:filePath error:&readError];
+                            if (data)
+                            {
+                                NSLog(@"read in data are %@",[[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding]);
+                            }
+                        }
+                    }
+                } progressBlock:nil];
+                
+            }
+        }];
+    }
+    
+}
+
+
+
 - (void)downloadFile
 {
     if (!self.canActionCMISDoc)
@@ -558,7 +641,6 @@ static NSString * kTEXTMIMETYPE = @"text/plain";
  */
 - (NSString *)temporaryTestFileForUpload
 {
-    CMISFileManager *manager = [CMISFileManager defaultManager];
     NSString *filePath = [[NSBundle bundleForClass:[self class]] pathForResource:@"test_file.txt" ofType:nil];
     NSFileHandle *fileHandle = [NSFileHandle fileHandleForUpdatingAtPath:filePath];
     NSData *content = [fileHandle readDataToEndOfFile];
@@ -566,13 +648,30 @@ static NSString * kTEXTMIMETYPE = @"text/plain";
     NSDateFormatter *formatter = [[NSDateFormatter alloc] init];
     [formatter setDateFormat: @"yyyy-MM-dd'T'HH-mm-ss-Z'"];
     NSString *documentName = [NSString stringWithFormat:@"test_file_%@.txt", [formatter stringFromDate:[NSDate date]]];
-    NSString * tmpPath = [manager internalFilePathFromName:documentName];
+    BOOL isDir;
+    BOOL tmpExists = [GDFileSystem fileExistsAtPath:kTMPDIRNAME isDirectory:&isDir];
+    if (!tmpExists || !isDir)
+    {
+        NSError *createError = nil;
+        BOOL success = [GDFileSystem createDirectoryAtPath:kTMPDIRNAME withIntermediateDirectories:NO attributes:nil error:&createError];
+        if (!success)
+        {
+            NSLog(@"Could not create directory in secure storage area");
+            return nil;
+        }
+    }
+    NSString *fileName = [NSString stringWithFormat:@"%@/%@", kTMPDIRNAME, documentName];
+    
 
     NSError *error = nil;
-    [manager createFileAtPath:tmpPath contents:content error:&error];
+    BOOL writeSuccess = [GDFileSystem writeToFile:content name:fileName error:&error];
+    if (!writeSuccess)
+    {
+        NSLog(@"we failed to write the content into the secure storage area into %@", fileName);
+    }
 
     [fileHandle closeFile];
-    return tmpPath;
+    return fileName;
 }
 
 - (NSString *)prepareBigTestFileForUpload

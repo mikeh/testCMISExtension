@@ -36,7 +36,6 @@
 		4EB9893316838297007C42E4 /* test_file.txt in Resources */ = {isa = PBXBuildFile; fileRef = 4E96A56E16831AEB001AABEB /* test_file.txt */; };
 		4EED485716B2DAAF00A0BAAC /* CustomGDCMISNetworkProvider.m in Sources */ = {isa = PBXBuildFile; fileRef = 4EED485616B2DAAF00A0BAAC /* CustomGDCMISNetworkProvider.m */; };
 		4EED485B16B2DACB00A0BAAC /* CustomGDCMISHttpRequest.m in Sources */ = {isa = PBXBuildFile; fileRef = 4EED485A16B2DACB00A0BAAC /* CustomGDCMISHttpRequest.m */; };
-		4EED489F16B67DFB00A0BAAC /* CustomGDCMISFileManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 4EED489E16B67DFB00A0BAAC /* CustomGDCMISFileManager.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -153,8 +152,7 @@
 		4E10AC1316BAA11E00E2287E /* CustomGDCMISSocketRequest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CustomGDCMISSocketRequest.m; sourceTree = "<group>"; };
 		4E38805C169D84AA004BB186 /* SampleTableViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SampleTableViewController.h; sourceTree = "<group>"; };
 		4E38805D169D84AA004BB186 /* SampleTableViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SampleTableViewController.m; sourceTree = "<group>"; };
-		4E3E14CA16B047770057CE22 /* CMISFileManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CMISFileManager.h; sourceTree = "<group>"; };
-		4E3E14CB16B047770057CE22 /* CMISPlaceholderFileManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CMISPlaceholderFileManager.h; sourceTree = "<group>"; };
+		4E6A0CC816C1386A00EFDEF9 /* CMISFileUtil.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CMISFileUtil.h; sourceTree = "<group>"; };
 		4E94B9DB16BFB00E00324AC8 /* cmis-spec-v1.0.pdf */ = {isa = PBXFileReference; lastKnownFileType = image.pdf; path = "cmis-spec-v1.0.pdf"; sourceTree = "<group>"; };
 		4E96A56E16831AEB001AABEB /* test_file.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = test_file.txt; sourceTree = "<group>"; };
 		4E96A57D16835318001AABEB /* GDCWriteStream+OutputStream.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "GDCWriteStream+OutputStream.h"; sourceTree = "<group>"; };
@@ -164,9 +162,6 @@
 		4EED485616B2DAAF00A0BAAC /* CustomGDCMISNetworkProvider.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CustomGDCMISNetworkProvider.m; sourceTree = "<group>"; };
 		4EED485916B2DACB00A0BAAC /* CustomGDCMISHttpRequest.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CustomGDCMISHttpRequest.h; sourceTree = "<group>"; };
 		4EED485A16B2DACB00A0BAAC /* CustomGDCMISHttpRequest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CustomGDCMISHttpRequest.m; sourceTree = "<group>"; };
-		4EED489D16B67DFB00A0BAAC /* CustomGDCMISFileManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CustomGDCMISFileManager.h; sourceTree = "<group>"; };
-		4EED489E16B67DFB00A0BAAC /* CustomGDCMISFileManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CustomGDCMISFileManager.m; sourceTree = "<group>"; };
-		4EED48AC16B6B5E800A0BAAC /* CMISDefaultFileManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CMISDefaultFileManager.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -244,8 +239,6 @@
 				4EED485616B2DAAF00A0BAAC /* CustomGDCMISNetworkProvider.m */,
 				4EED485916B2DACB00A0BAAC /* CustomGDCMISHttpRequest.h */,
 				4EED485A16B2DACB00A0BAAC /* CustomGDCMISHttpRequest.m */,
-				4EED489D16B67DFB00A0BAAC /* CustomGDCMISFileManager.h */,
-				4EED489E16B67DFB00A0BAAC /* CustomGDCMISFileManager.m */,
 				4E10AC1216BAA11D00E2287E /* CustomGDCMISSocketRequest.h */,
 				4E10AC1316BAA11E00E2287E /* CustomGDCMISSocketRequest.m */,
 			);
@@ -281,10 +274,8 @@
 		4E0076FF1681BA7700908DE9 /* CMIS */ = {
 			isa = PBXGroup;
 			children = (
-				4EED48AC16B6B5E800A0BAAC /* CMISDefaultFileManager.h */,
+				4E6A0CC816C1386A00EFDEF9 /* CMISFileUtil.h */,
 				4EED47B016B2789700A0BAAC /* CMISDefaultNetworkProvider.h */,
-				4E3E14CA16B047770057CE22 /* CMISFileManager.h */,
-				4E3E14CB16B047770057CE22 /* CMISPlaceholderFileManager.h */,
 				4E0077001681BA9800908DE9 /* CMISAclService.h */,
 				4E0077011681BA9800908DE9 /* CMISAllowableActions.h */,
 				4E0077021681BA9800908DE9 /* CMISAllowableActionsParser.h */,
@@ -450,7 +441,6 @@
 				4E38805E169D84AA004BB186 /* SampleTableViewController.m in Sources */,
 				4EED485716B2DAAF00A0BAAC /* CustomGDCMISNetworkProvider.m in Sources */,
 				4EED485B16B2DACB00A0BAAC /* CustomGDCMISHttpRequest.m in Sources */,
-				4EED489F16B67DFB00A0BAAC /* CustomGDCMISFileManager.m in Sources */,
 				4E10AC1416BAA11E00E2287E /* CustomGDCMISSocketRequest.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

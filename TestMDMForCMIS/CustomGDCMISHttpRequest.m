@@ -31,7 +31,8 @@
 @property (nonatomic, strong) NSDictionary *authenticationHeader;
 @property (nonatomic, assign) unsigned long long bytesExpected;
 @property (nonatomic, strong) GDCWriteStream * outputStream;
-@property (nonatomic, strong) GDCReadStream * inputStream;
+@property (nonatomic, strong) NSInputStream * inputStream;
+@property (nonatomic, strong) NSString * filePath;
 - (void)onOpened:(CustomGDCMISHttpRequest *)currentHttpRequest;
 - (void)onHeaderReceived:(CustomGDCMISHttpRequest *)currentHttpRequest;
 - (void)onDone:(CustomGDCMISHttpRequest *)currentHttpRequest;
@@ -43,18 +44,6 @@
 
 
 @implementation CustomGDCMISHttpRequest
-@synthesize strongHttpRequestDelegate = _strongHttpRequestDelegate;
-@synthesize requestMethod = _requestMethod;
-@synthesize requestBody = _requestBody;
-@synthesize uploadData = _uploadData;
-@synthesize completionBlock = _completionBlock;
-@synthesize progressBlock = _progressBlock;
-@synthesize headers = _headers;
-@synthesize authenticationHeader = _authenticationHeader;
-@synthesize outputStream = _outputStream;
-@synthesize inputStream = _inputStream;
-@synthesize receivedData = _receivedData;
-@synthesize bytesExpected = _bytesExpected;
 
 - (id)init
 {
@@ -136,6 +125,10 @@
             sendSuccess = [currentHttpRequest sendData:self.uploadData];
         }
     }
+    else if (self.filePath)
+    {
+        sendSuccess = [currentHttpRequest sendWithFile:self.filePath withTimeout:60];
+    }
     else
     {
         sendSuccess = [currentHttpRequest send];
@@ -196,7 +189,7 @@
                           method:(NSString *)httpMethod
                             body:(NSData *)body
                          headers:(NSDictionary *)headers
-                     inputStream:(GDCReadStream *)inputStream
+                     inputStream:(NSInputStream *)inputStream
                     outputStream:(GDCWriteStream *)outputStream
                    bytesExpected:(unsigned long long)expected
                  completionBlock:(void (^)(CMISHttpResponse *httpResponse, NSError *error))completionBlock
@@ -208,6 +201,7 @@
     self.headers = headers;
     self.inputStream = inputStream;
     self.outputStream = outputStream;
+    self.filePath = nil;
     self.bytesExpected = expected;
     self.completionBlock = completionBlock;
     self.progressBlock = progressBlock;
@@ -217,6 +211,28 @@
 }
 
 
+- (BOOL)prepareConnectionWithURL:(NSURL *)url
+                         session:(CMISBindingSession *)session
+                          method:(NSString *)httpMethod
+                            body:(NSData *)body
+                         headers:(NSDictionary *)headers
+                        filePath:(NSString *)filePath
+                   bytesExpected:(unsigned long long)expected
+                 completionBlock:(void (^)(CMISHttpResponse *httpResponse, NSError *error))completionBlock
+{
+    self.requestBody = body;
+    self.requestMethod = httpMethod;
+    self.headers = headers;
+    self.bytesExpected = expected;
+    self.completionBlock = completionBlock;
+    self.progressBlock = nil;
+    self.filePath = filePath;
+    self.inputStream = nil;
+    self.outputStream = nil;
+    id <CMISAuthenticationProvider> authenticationProvider = session.authenticationProvider;
+    self.authenticationHeader = [NSDictionary dictionaryWithDictionary:authenticationProvider.httpHeadersToApply];
+    return [self open:[self.requestMethod UTF8String] withUrl:[[url absoluteString] UTF8String] withAsync:YES];
+}
 
 
 - (void)prepareRequestHeadersForRequest:(CustomGDCMISHttpRequest *)request
@@ -230,11 +246,23 @@
             [request setRequestHeader:[headerName UTF8String] withValue:[header UTF8String]];
         }];
     }
+    if ([self.requestMethod isEqualToString:@"POST"] && self.bytesExpected > 0 && self.filePath)
+    {
+        [request setRequestHeader:[@"Accept" UTF8String] withValue:[@"*/*" UTF8String]];
+        [request setRequestHeader:[@"Content-Encoding" UTF8String] withValue:[@"base64" UTF8String]];
+        NSString *lengthString = [NSString stringWithFormat:@"%llu",self.bytesExpected];
+        [request setRequestHeader:[@"Content-Length" UTF8String] withValue:[lengthString UTF8String]];
+    }
 }
 
 
 - (NSData *)dataFromInput
 {
+    BOOL streamIsReady = self.inputStream.streamStatus == NSStreamStatusOpen;
+    if (!streamIsReady)
+    {
+        [self.inputStream open];
+    }
     if (![self.inputStream hasBytesAvailable])
     {
         return nil;

@@ -25,7 +25,6 @@ typedef enum {
 
 @protocol CMISNetworkProvider <NSObject>
 
-@property (nonatomic, readonly) BOOL supportsDirectXMLStreaming;
 
 - (void)invoke:(NSURL *)url
 withHttpMethod:(CMISHttpRequestMethod)httpRequestMethod
@@ -34,14 +33,14 @@ withHttpMethod:(CMISHttpRequestMethod)httpRequestMethod
        headers:(NSDictionary *)additionalHeaders
 completionBlock:(void (^)(CMISHttpResponse *httpResponse, NSError *error))completionBlock;
 
-/*
+
 - (void)invoke:(NSURL *)url
 withHttpMethod:(CMISHttpRequestMethod)httpRequestMethod
    withSession:(CMISBindingSession *)session
    inputStream:(NSInputStream *)inputStream
        headers:(NSDictionary *)additionalHeaders
 completionBlock:(void (^)(CMISHttpResponse *httpResponse, NSError *error))completionBlock;
-*/
+
 
 - (void)invoke:(NSURL *)url withHttpMethod:(CMISHttpRequestMethod)httpRequestMethod
    withSession:(CMISBindingSession *)session
@@ -87,11 +86,9 @@ completionBlock:(void (^)(CMISHttpResponse *httpResponse, NSError *error))comple
 @optional
 - (void)invoke:(NSURL *)url withHttpMethod:(CMISHttpRequestMethod)httpRequestMethod
    withSession:(CMISBindingSession *)session
-   inputStream:(NSInputStream *)inputStream
+      filePath:(NSString *)encodedFilePath
        headers:(NSDictionary *)additionalHeaders
  bytesExpected:(unsigned long long)bytesExpected
-      mimeType:(NSString *)mimeType
-    properties:(CMISProperties *)properties
 completionBlock:(void (^)(CMISHttpResponse *httpResponse, NSError *error))completionBlock
  progressBlock:(void (^)(unsigned long long bytesDownloaded, unsigned long long bytesTotal))progressBlock
  requestObject:(CMISRequest *)requestObject;

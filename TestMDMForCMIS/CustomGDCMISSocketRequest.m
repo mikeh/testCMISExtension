@@ -125,6 +125,7 @@ NSString * HTTPLASTCHUNK = @"0\r\n";
  */
 - (void)onOpen:(CustomGDCMISSocketRequest *)currentSocket
 {
+    NSLog(@"CustomGDCMISSocketRequest:: onOpen");
     if (!self.receivedData)
     {
         self.receivedData = [NSMutableData data];
@@ -143,6 +144,7 @@ NSString * HTTPLASTCHUNK = @"0\r\n";
 
         length += [CustomGDCMISSocketRequest base64EncodedLength:self.bytesExpected];
         NSString *header = [self headerWithContentLength:length];
+        NSLog(@"CustomGDCMISSocketRequest:: onOpen - we are expected to write %d bytes to the stream", length);
         [currentSocket.writeStream write:[header UTF8String]];
         [currentSocket write];
         
@@ -170,6 +172,7 @@ NSString * HTTPLASTCHUNK = @"0\r\n";
         [currentSocket.writeStream writeData:xmlBodyClose];
         [currentSocket.writeStream writeData:xmlProperties];
         [currentSocket write];
+        NSLog(@"CustomGDCMISSocketRequest:: onOpen - we have written  %d bytes to the stream", realLength);
 
         if (length > realLength)
         {
@@ -230,6 +233,7 @@ NSString * HTTPLASTCHUNK = @"0\r\n";
 - (void)onRead:(CustomGDCMISSocketRequest *)currentSocket
 {
     NSData *returnedData = [currentSocket.readStream unreadData];
+    NSLog(@"CustomGDCMISSocketRequest:: onRead - reading in %d bytes", returnedData.length);
     
     const unsigned char *bytes = [returnedData bytes];
     
@@ -241,6 +245,7 @@ NSString * HTTPLASTCHUNK = @"0\r\n";
 
 - (void)onClose:(CustomGDCMISSocketRequest *)currentSocket
 {
+    NSLog(@"CustomGDCMISSocketRequest:: onClose");
     UInt32 statusCode_32;
     CFDataRef serializedData;
     CFStringRef statusline;
@@ -265,18 +270,25 @@ NSString * HTTPLASTCHUNK = @"0\r\n";
         }
     }
     
-    NSString *statusMessage = (__bridge_transfer NSString *)statusline;
+    NSLog(@"Received data are %@", [[NSString alloc] initWithData:self.receivedData encoding:NSUTF8StringEncoding]);
     
+    
+    NSString *statusMessage = (__bridge_transfer NSString *)statusline;
+    if (nil == statusMessage)
+    {
+        statusMessage = @"No message given";
+    }
     if (200 <= statusCode_32 && 299 >= statusCode_32)
     {
+        NSLog(@"The statusCode is %ld",statusCode_32);
         CMISHttpResponse * httpResponse = [CMISHttpResponse responseWithStatusCode:statusCode_32 statusMessage:statusMessage headers:nil responseData:cleanedData];
         self.completionBlock(httpResponse, nil);
     }
     else
     {
-        NSLog(@"We get a error as HTTP status: %ld and message %@", statusCode_32, statusMessage);
+//        NSLog(@"We get a error as HTTP status: %ld and message %@", statusCode_32, statusMessage);
         NSError * error = [CMISErrors createCMISErrorWithCode:kCMISErrorCodeFilterNotValid
-                                      withDetailedDescription:statusMessage];
+                                      withDetailedDescription:@"An error occurred on the socket"];
         self.completionBlock(nil, error);
         
     }
@@ -325,8 +337,6 @@ NSString * HTTPLASTCHUNK = @"0\r\n";
     
     [requestHeader appendString:@"Accept: */*"];
     [requestHeader appendString:HTTPCRLF];
-//    [requestHeader appendString:HTTPCONNECTION];
-//    [requestHeader appendString:HTTPCRLF];
     [requestHeader appendString:HTTPCODING];
     [requestHeader appendString:HTTPCRLF];
     [requestHeader appendString:HTTPCRLF];

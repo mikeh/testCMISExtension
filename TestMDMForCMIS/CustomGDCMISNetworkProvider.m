@@ -27,25 +27,13 @@
 #import "CMISHttpUploadRequest.h"
 #import "CMISRequest.h"
 #import "CMISSessionParameters.h"
-#import "CustomGDCMISSocketRequest.h"
+//#import "CustomGDCMISSocketRequest.h"
 
 @interface CustomGDCMISNetworkProvider ()
 + (NSString *)httpMethodString:(CMISHttpRequestMethod) requestMethod;
-@property (nonatomic, readwrite) BOOL supportsDirectXMLStreaming;
 @end
 
 @implementation CustomGDCMISNetworkProvider
-@synthesize supportsDirectXMLStreaming = _supportsDirectXMLStreaming;
-
-- (id)init
-{
-    self = [super init];
-    if (self != nil)
-    {
-        self.supportsDirectXMLStreaming = YES;
-    }
-    return self;
-}
 
 
 
@@ -80,6 +68,7 @@ completionBlock:(void (^)(CMISHttpResponse *httpResponse, NSError *error))comple
 }
 
 /*
+ */
 - (void)invoke:(NSURL *)url
 withHttpMethod:(CMISHttpRequestMethod)httpRequestMethod
    withSession:(CMISBindingSession *)session
@@ -93,7 +82,7 @@ completionBlock:(void (^)(CMISHttpResponse *httpResponse, NSError *error))comple
                                                      method:[CustomGDCMISNetworkProvider httpMethodString:httpRequestMethod]
                                                        body:nil
                                                     headers:additionalHeaders
-                                                inputStream:(GDCReadStream *)inputStream
+                                                inputStream:(NSInputStream *)inputStream
                                                outputStream:nil
                                               bytesExpected:0
                                             completionBlock:completionBlock
@@ -105,8 +94,50 @@ completionBlock:(void (^)(CMISHttpResponse *httpResponse, NSError *error))comple
         completionBlock(nil, cmisError);
     }
 }
-*/
 
+/*
+ The code below is an optional method on the CMISNetworkProvider protocol. It accepts a filepath as argument.
+ Acc to Good documentation, this filepath must NOT be one in the secure storage area. All the same - as we point the filepath to the
+ base64 encoded file in the NSTemporaryDictionary() folder
+ 
+ However, I spent some time trying to get sendWithFile method to work for uploads, but to no avail.
+ Pending further investigation and some feedback from Good I am not sure that this is the way to go.
+ Disabling this method, will use the default input stream invoke method, where the input stream points to the base64 file.
+ */
+/*
+- (void)invoke:(NSURL *)url withHttpMethod:(CMISHttpRequestMethod)httpRequestMethod
+   withSession:(CMISBindingSession *)session
+      filePath:(NSString *)encodedFilePath
+       headers:(NSDictionary *)additionalHeaders
+ bytesExpected:(unsigned long long)bytesExpected
+completionBlock:(void (^)(CMISHttpResponse *httpResponse, NSError *error))completionBlock
+ progressBlock:(void (^)(unsigned long long bytesDownloaded, unsigned long long bytesTotal))progressBlock
+ requestObject:(CMISRequest *)requestObject
+{
+    CustomGDCMISHttpRequest *request = [[CustomGDCMISHttpRequest alloc] init];
+    NSLog(@"uploading file %@",encodedFilePath);
+    BOOL success = [request prepareConnectionWithURL:url
+                                             session:session
+                                              method:[CustomGDCMISNetworkProvider httpMethodString:httpRequestMethod]
+                                                body:nil
+                                             headers:additionalHeaders
+                                            filePath:encodedFilePath
+                                       bytesExpected:bytesExpected
+                                     completionBlock:completionBlock];
+    
+    if(!success && completionBlock)
+    {
+        NSString *detailedDescription = [NSString stringWithFormat:@"Could not create connection to %@", [url absoluteString]];
+        NSError *cmisError = [CMISErrors createCMISErrorWithCode:kCMISErrorCodeConnection withDetailedDescription:detailedDescription];
+        completionBlock(nil, cmisError);
+    }
+}
+ */
+
+/* 
+ This is the method designed to be used with GDSockets - except this won't work when using SSL connections.
+ */
+/*
 - (void)invoke:(NSURL *)url
 withHttpMethod:(CMISHttpRequestMethod)httpRequestMethod
    withSession:(CMISBindingSession *)session
@@ -137,18 +168,23 @@ completionBlock:(void (^)(CMISHttpResponse *, NSError *))completionBlock
         [serviceApiString appendString:[apiComponents objectAtIndex:i]];
     }
     NSString *serviceApi = (NSString *)serviceApiString;
+    int portID = 80;
     
-    if ([host hasSuffix:@":80"])
+    NSArray *hostArray = [host componentsSeparatedByString:@":"];
+    host = [hostArray objectAtIndex:0];
+    if (1 < hostArray.count)
     {
-        host = [[host componentsSeparatedByString:@":80"] objectAtIndex:0];
-        NSLog(@"reduced the host name to %@", host);
+        NSString *portNumber = [hostArray objectAtIndex:1];
+        portID = [portNumber intValue];
     }
     
     
+    BOOL isSSL = ([separator isEqualToString:@"https://"] ? YES : NO);
+    
     CustomGDCMISSocketRequest *request = [[CustomGDCMISSocketRequest alloc] initWithHostName:host
                                                                                   serviceAPI:serviceApi
-                                                                                        port:80
-                                                                                      useSSL:NO];
+                                                                                        port:portID
+                                                                                      useSSL:isSSL];
     [request prepareConnectionWithSession:session
                                    method:[CustomGDCMISNetworkProvider httpMethodString:httpRequestMethod]
                                   headers:additionalHeaders
@@ -172,7 +208,7 @@ completionBlock:(void (^)(CMISHttpResponse *, NSError *))completionBlock
     }
 
 }
-
+*/
 
 - (void)invoke:(NSURL *)url
 withHttpMethod:(CMISHttpRequestMethod)httpRequestMethod
@@ -222,7 +258,7 @@ completionBlock:(void (^)(CMISHttpResponse *httpResponse, NSError *error))comple
                                                      method:[CustomGDCMISNetworkProvider httpMethodString:httpRequestMethod]
                                                        body:nil
                                                     headers:additionalHeaders
-                                                inputStream:(GDCReadStream *)inputStream
+                                                inputStream:(NSInputStream *)inputStream
                                                outputStream:nil
                                               bytesExpected:bytesExpected
                                             completionBlock:completionBlock
