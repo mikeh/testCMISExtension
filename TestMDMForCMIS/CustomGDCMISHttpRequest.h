@@ -47,7 +47,6 @@
 - (BOOL)prepareConnectionWithURL:(NSURL *)url
                          session:(CMISBindingSession *)session
                           method:(NSString *)httpMethod
-                            body:(NSData *)body
                          headers:(NSDictionary *)headers
                         filePath:(NSString *)filePath
                    bytesExpected:(unsigned long long)expected

@@ -44,6 +44,8 @@ static NSString * kTMPDIRNAME = @"/tmp";
 @property (nonatomic, strong) CMISRequest *request;
 @property (nonatomic, strong) NSString *testDocId;
 @property (nonatomic, strong) NSString *downloadPath;
+@property (nonatomic, strong) NSString *uploadFolderId;
+@property (nonatomic, strong) NSString *downloadFileId;
 @property BOOL canActionCMISDoc;
 @property BOOL canRemoveCMISDoc;
 @property BOOL isTSServer;
@@ -64,6 +66,8 @@ static NSString * kTMPDIRNAME = @"/tmp";
     self.uploadBigLabel.textColor = [UIColor lightGrayColor];
     self.canRemoveCMISDoc = NO;
     self.canActionCMISDoc = NO;
+    self.downloadFileId = nil;
+    self.uploadFolderId = nil;
 
 }
 
@@ -99,7 +103,7 @@ static NSString * kTMPDIRNAME = @"/tmp";
             break;
         case 3:
         {
-            if (self.isTSServer)
+            if (self.downloadFileId)
             {
                 [self downloadFileFromTS];
             }
@@ -126,11 +130,13 @@ static NSString * kTMPDIRNAME = @"/tmp";
     NSDictionary *environmentsDict = [[NSDictionary alloc] initWithContentsOfFile:envsPListPath];
     NSArray *environmentArray = [environmentsDict objectForKey:@"environments"];
     
-    NSDictionary *environmentKeys = [environmentArray objectAtIndex:1];
+    NSDictionary *environmentKeys = [environmentArray objectAtIndex:0];
     NSString *url = [environmentKeys valueForKey:@"url"];
     NSString *repositoryId = [environmentKeys valueForKey:@"repositoryId"];
     NSString *username = [environmentKeys valueForKey:@"username"];
     NSString *password = [environmentKeys valueForKey:@"password"];
+    NSString *downloadId = [environmentKeys valueForKey:@"downloadID"];
+    NSString *folderId = [environmentKeys valueForKey:@"uploadFolderId"];
 
     if ([url hasPrefix:@"https://ts"])
     {
@@ -139,6 +145,15 @@ static NSString * kTMPDIRNAME = @"/tmp";
     else
     {
         self.isTSServer = NO;
+    }
+    
+    if (downloadId)
+    {
+        self.downloadFileId = downloadId;
+    }
+    if (self.uploadFolderId)
+    {
+        self.uploadFolderId = folderId;
     }
     
     CMISSessionParameters *parameters = [[CMISSessionParameters alloc] initWithBindingType:CMISBindingTypeAtomPub];
@@ -199,7 +214,7 @@ static NSString * kTMPDIRNAME = @"/tmp";
                     self.downloadCell.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
                     self.downloadCell.selectionStyle = UITableViewCellSelectionStyleGray;
                     self.canActionCMISDoc = YES;
-                    if (self.isTSServer)
+                    if (self.uploadFolderId)
                     {
                         [self.session retrieveObject:kMyOwnFolder completionBlock:^(CMISObject *folderObject, NSError *folderError){
                             if (nil == folderObject)
@@ -489,7 +504,7 @@ static NSString * kTMPDIRNAME = @"/tmp";
     }
     if (self.session)
     {
-        [self.session retrieveObject:kTestfileForDownload completionBlock:^(CMISObject *object, NSError *error){
+        [self.session retrieveObject:self.downloadFileId completionBlock:^(CMISObject *object, NSError *error){
             if (nil == object)
             {
                 UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Error"

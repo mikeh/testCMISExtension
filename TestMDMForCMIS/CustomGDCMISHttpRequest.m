@@ -51,7 +51,6 @@
     if (self != nil)
     {
         [self setDelegate:self];
-        //        self.strongHttpRequestDelegate = self;
     }
     return self;
 }
@@ -158,12 +157,6 @@
     if (200 <= statusCode && 299 >= statusCode)
     {
         NSLog(@"The HTTP request returns with HTTP ok status code %d",statusCode);
-        /*
-         if (self.receivedData)
-         {
-         NSLog(@"The amount of data we get back is %d and content is %@",[self.receivedData length], [[NSString alloc] initWithData:self.receivedData encoding:NSUTF8StringEncoding]);
-         }
-         */
         CMISHttpResponse * httpResponse = [CMISHttpResponse responseWithStatusCode:statusCode statusMessage:message headers:nil responseData:self.receivedData];
         self.completionBlock(httpResponse, nil);
     }
@@ -174,6 +167,14 @@
                                       withDetailedDescription:message];
         self.completionBlock(nil, error);
     }
+    
+    /**
+     for logging purposes
+    if (self.receivedData)
+    {
+        NSLog(@"The amount of data we get back is %d and content is %@",[self.receivedData length], [[NSString alloc] initWithData:self.receivedData encoding:NSUTF8StringEncoding]);
+    }
+     */
     self.completionBlock = nil;
     [currentHttpRequest close];
 }
@@ -214,13 +215,12 @@
 - (BOOL)prepareConnectionWithURL:(NSURL *)url
                          session:(CMISBindingSession *)session
                           method:(NSString *)httpMethod
-                            body:(NSData *)body
                          headers:(NSDictionary *)headers
                         filePath:(NSString *)filePath
                    bytesExpected:(unsigned long long)expected
                  completionBlock:(void (^)(CMISHttpResponse *httpResponse, NSError *error))completionBlock
 {
-    self.requestBody = body;
+    self.requestBody = nil;
     self.requestMethod = httpMethod;
     self.headers = headers;
     self.bytesExpected = expected;
@@ -245,13 +245,6 @@
         [self.headers enumerateKeysAndObjectsUsingBlock:^(NSString *headerName, NSString *header, BOOL *stop) {
             [request setRequestHeader:[headerName UTF8String] withValue:[header UTF8String]];
         }];
-    }
-    if ([self.requestMethod isEqualToString:@"POST"] && self.bytesExpected > 0 && self.filePath)
-    {
-        [request setRequestHeader:[@"Accept" UTF8String] withValue:[@"*/*" UTF8String]];
-        [request setRequestHeader:[@"Content-Encoding" UTF8String] withValue:[@"base64" UTF8String]];
-        NSString *lengthString = [NSString stringWithFormat:@"%llu",self.bytesExpected];
-        [request setRequestHeader:[@"Content-Length" UTF8String] withValue:[lengthString UTF8String]];
     }
 }
 

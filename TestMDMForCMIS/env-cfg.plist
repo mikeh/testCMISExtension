@@ -6,9 +6,9 @@
 	<array>
 		<dict>
 			<key>username</key>
-			<string>admin</string>
+			<string>&lt;YourUserName&gt;</string>
 			<key>password</key>
-			<string>alzheimer</string>
+			<string>&lt;YourPassword&gt;</string>
 			<key>url</key>
 			<string>http://ec2-54-247-141-218.eu-west-1.compute.amazonaws.com/alfresco/service/api/cmis</string>
 			<key>repositoryId</key>
@@ -23,6 +23,24 @@
 			<string>https://ts.alfresco.com/alfresco/service/cmis</string>
 			<key>repositoryId</key>
 			<string>b5de7b90-78a4-41a2-b816-aa12b09015dd</string>
+			<key>downloadID</key>
+			<string>workspace://SpacesStore/15e47b2f-b5af-453e-b194-69a715aef3f2</string>
+			<key>uploadFolderId</key>
+			<string>workspace://SpacesStore/f4f16957-5287-46e4-b405-0aa64bbddb7e</string>
+		</dict>
+		<dict>
+			<key>username</key>
+			<string>&lt;YourUserName&gt;</string>
+			<key>password</key>
+			<string>&lt;YourPassword&gt;</string>
+			<key>url</key>
+			<string>http://localhost:8080/alfresco/service/cmis</string>
+			<key>repositoryId</key>
+			<string>8f657d2c-6ce6-4567-b69c-ed28708b1798</string>
+			<key>downloadID</key>
+			<string>workspace://SpacesStore/a927875b-2779-43d8-8301-27e4a2529ad7</string>
+			<key>uploadFolderId</key>
+			<string>workspace://SpacesStore/2e91fcd0-9a5a-4432-9c39-a73b042d7347</string>
 		</dict>
 	</array>
 </dict>

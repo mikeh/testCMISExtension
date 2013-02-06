@@ -97,12 +97,13 @@ completionBlock:(void (^)(CMISHttpResponse *httpResponse, NSError *error))comple
 
 /*
  The code below is an optional method on the CMISNetworkProvider protocol. It accepts a filepath as argument.
- Acc to Good documentation, this filepath must NOT be one in the secure storage area. All the same - as we point the filepath to the
- base64 encoded file in the NSTemporaryDictionary() folder
+ This filepath needs to be in the standard file system area - and NOT in the secure storage area (acc to Good).
  
- However, I spent some time trying to get sendWithFile method to work for uploads, but to no avail.
- Pending further investigation and some feedback from Good I am not sure that this is the way to go.
- Disabling this method, will use the default input stream invoke method, where the input stream points to the base64 file.
+ NOTE/WARNING:
+ The sendWithFile: method of GDHttpRequest is using PUT HTTP methods only (even if you pass in POST).
+ This means we cannot use this method, as a PUT request would attempt to modify the folder itself, rather than creating a file in it.
+ This issue has been flagged with Good
+ https://begood.good.com/message/9774#9774
  */
 /*
 - (void)invoke:(NSURL *)url withHttpMethod:(CMISHttpRequestMethod)httpRequestMethod
@@ -119,7 +120,6 @@ completionBlock:(void (^)(CMISHttpResponse *httpResponse, NSError *error))comple
     BOOL success = [request prepareConnectionWithURL:url
                                              session:session
                                               method:[CustomGDCMISNetworkProvider httpMethodString:httpRequestMethod]
-                                                body:nil
                                              headers:additionalHeaders
                                             filePath:encodedFilePath
                                        bytesExpected:bytesExpected
