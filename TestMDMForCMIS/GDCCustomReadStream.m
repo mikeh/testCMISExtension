@@ -93,7 +93,7 @@
 
 
 #pragma Private methods based on CFReadStream. These are not provided by GDCReadStream
-- (void)_scheduleInCFRunLook:(CFRunLoopRef)runLoop forMode:(CFStringRef)mode
+- (void)_scheduleInCFRunLoop:(CFRunLoopRef)runLoop forMode:(CFStringRef)mode
 {
     //do we need an extra run loop? Let's try without
 }
@@ -123,7 +123,7 @@
     return YES;
 }
 
-- (void)_unscheduleInCFRunLook:(CFRunLoopRef)runLoop forMode:(CFStringRef)mode
+- (void)_unscheduleInCFRunLoop:(CFRunLoopRef)runLoop forMode:(CFStringRef)mode
 {
     //do we need an extra run loop? Let's try without    
 }

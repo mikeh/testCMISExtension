@@ -6,9 +6,9 @@
 	<array>
 		<dict>
 			<key>username</key>
-			<string>&lt;YourUserName&gt;</string>
+			<string>admin</string>
 			<key>password</key>
-			<string>&lt;YourPassword&gt;</string>
+			<string>alzheimer</string>
 			<key>url</key>
 			<string>http://ec2-54-247-141-218.eu-west-1.compute.amazonaws.com/alfresco/service/api/cmis</string>
 			<key>repositoryId</key>
@@ -16,9 +16,9 @@
 		</dict>
 		<dict>
 			<key>username</key>
-			<string>&lt;YourUserName&gt;</string>
+			<string>pschmidt</string>
 			<key>password</key>
-			<string>&lt;YourPassword&gt;</string>
+			<string>ggdd6247</string>
 			<key>url</key>
 			<string>https://ts.alfresco.com/alfresco/service/cmis</string>
 			<key>repositoryId</key>
@@ -30,9 +30,9 @@
 		</dict>
 		<dict>
 			<key>username</key>
-			<string>&lt;YourUserName&gt;</string>
+			<string>admin</string>
 			<key>password</key>
-			<string>&lt;YourPassword&gt;</string>
+			<string>admin</string>
 			<key>url</key>
 			<string>http://localhost:8080/alfresco/service/cmis</string>
 			<key>repositoryId</key>

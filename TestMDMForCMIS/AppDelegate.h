@@ -22,7 +22,6 @@
 
 #import <GD/GDiOS.h>
 
-
 @interface AppDelegate : UIResponder <UIApplicationDelegate, GDiOSDelegate> {
     BOOL started;
 }

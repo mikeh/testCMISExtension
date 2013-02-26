@@ -163,7 +163,14 @@ static NSString * kTMPDIRNAME = @"/tmp";
     parameters.atomPubUrl = [NSURL URLWithString:url];
 
     /**
-     Network IO setting. We need to provide the HTTP invoker here
+     Network IO setting. This is for the use case where we use our own network provider
+     It must be an implementation of the CMISNetworkProvider protocol. In this instance 
+     it is the CustomGDCMISNetworkProvider class.
+     
+     If we do NOT provide this, we need to ensure that communication is secure using GD networking
+     To do this use
+     [GDURLLoadingSystem enableSecureCommunication];
+     AFTER GD has been successfully authenticated (typically a method in the AppDelegate)
      */
     CustomGDCMISNetworkProvider *networkProvider = [[CustomGDCMISNetworkProvider alloc] init];
     parameters.networkProvider = networkProvider;

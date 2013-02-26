@@ -19,7 +19,7 @@
  */
 
 #import "AppDelegate.h"
-
+#import <GD/GDNETiOS.h>
 @implementation AppDelegate
 
 @synthesize good = _good;
@@ -29,7 +29,8 @@ NSString* kappId = @"__MyCompanyName__.Test31";
 NSString* kappVersion = @"1.0.0.0";
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
-{ 
+{
+    [self setUpUserSettings];
     self.window = [[GDiOS sharedInstance] getWindow];
     self.good = [GDiOS sharedInstance];
     _good.delegate = self;
@@ -98,7 +99,15 @@ NSString* kappVersion = @"1.0.0.0";
         {
             // handle app config changes
 			break;
-        }            
+        }
+        case GDAppEventServicesUpdate:
+        {
+            break;
+        }
+        case GDAppEventPolicyUpdate:
+        {
+            break;
+        }
     }
 }
 
@@ -143,6 +152,10 @@ NSString* kappVersion = @"1.0.0.0";
     switch (anEvent.code) {
         case GDErrorNone: {
             if (!started) {
+                /** if we are NOT using GDHttpRequest API - ensure that we use the secure Communication API
+                 ** see https://begood.good.com/message/9926#9926 
+                 ** [GDURLLoadingSystem enableSecureCommunication];
+                 */
                 // launch application UI here
                 started = YES;
             }
@@ -151,6 +164,44 @@ NSString* kappVersion = @"1.0.0.0";
         default:
             NSAssert(false, @"Authorised startup with an error");
             break;
+    }
+}
+
+- (void)setUpUserSettings
+{
+    NSArray *serverSettings = [[NSUserDefaults standardUserDefaults] objectForKey:@"serverSettings"];
+    if (nil == serverSettings)
+    {
+        NSMutableArray *settings = [NSMutableArray arrayWithCapacity:3];
+        NSMutableDictionary *amazon = [NSMutableDictionary dictionary];
+        [amazon setObject:@"http://ec2-54-247-141-218.eu-west-1.compute.amazonaws.com/alfresco/service/api/cmis" forKey:@"url"];
+        [amazon setObject:@"" forKey:@"username"];
+        [amazon setObject:@"" forKey:@"password"];
+        [amazon setObject:@"368eca28-be2b-4a8d-8bbb-1d7997af7930" forKey:@"repositoryId"];
+        [amazon setObject:@"" forKey:@"downloadId"];
+        [amazon setObject:@"" forKey:@"uploadId"];
+        
+        [settings addObject:amazon];
+        NSMutableDictionary *ts = [NSMutableDictionary dictionary];
+        [ts setObject:@"https://ts.alfresco.com/alfresco/service/cmis" forKey:@"url"];
+        [ts setObject:@"" forKey:@"username"];
+        [ts setObject:@"" forKey:@"password"];
+        [ts setObject:@"" forKey:@"repositoryId"];
+        [ts setObject:@"" forKey:@"downloadId"];
+        [ts setObject:@"" forKey:@"uploadId"];
+        [settings addObject:ts];
+
+        NSMutableDictionary *localHost = [NSMutableDictionary dictionary];
+        [localHost setObject:@"http://localhost:8080/alfresco/service/cmis" forKey:@"url"];
+        [localHost setObject:@"" forKey:@"username"];
+        [localHost setObject:@"" forKey:@"password"];
+        [localHost setObject:@"" forKey:@"repositoryId"];
+        [localHost setObject:@"" forKey:@"downloadId"];
+        [localHost setObject:@"" forKey:@"uploadId"];
+        [settings addObject:localHost];
+        
+        [[NSUserDefaults standardUserDefaults] setObject:settings forKey:@"serverSettings"];
+        [[NSUserDefaults standardUserDefaults] synchronize];
     }
 }
 
