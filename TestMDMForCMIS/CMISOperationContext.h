@@ -26,7 +26,7 @@
 @property (nonatomic, strong) NSString *filterString;
 @property (nonatomic, assign) BOOL includeAllowableActions;
 @property (nonatomic, assign) BOOL includeACLs;
-@property (nonatomic, assign) CMISIncludeRelationship includeRelationShips;
+@property (nonatomic, assign) CMISIncludeRelationship relationships;
 @property (nonatomic, assign) BOOL includePolicies;
 @property (nonatomic, strong) NSString *renditionFilterString;
 @property (nonatomic, strong) NSString *orderBy;
@@ -34,6 +34,11 @@
 @property (nonatomic, assign) NSInteger maxItemsPerPage;
 @property (nonatomic, assign) NSInteger skipCount;
 
+/**
+ * creates a default operationContext instance. The defaults are
+ - 100 items per page
+ - start at first 100 items
+ */
 + (CMISOperationContext *)defaultOperationContext;
 
 @end

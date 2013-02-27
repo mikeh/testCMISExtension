@@ -36,12 +36,18 @@ typedef enum
 @property (nonatomic, strong) NSString *filter;
 @property BOOL includeAllowableActions;
 @property BOOL includePolicyIds;
-@property CMISIncludeRelationship includeRelationships;
+@property CMISIncludeRelationship relationships;
 @property BOOL includeACL;
 @property (nonatomic, strong) NSString *renditionFilter;
 @property CMISReturnVersion returnVersion;
 
+/**
+ * initialise with the template URL string
+ */
 - (id)initWithTemplateUrl:(NSString *)templateUrl;
+/**
+ * returns the URL
+ */
 - (NSURL *)buildUrl;
 
 @end

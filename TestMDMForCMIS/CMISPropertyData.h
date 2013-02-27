@@ -54,31 +54,40 @@
 /** Convenience method for retrieving the decimal value. Returns nil if property is not of decimal type */
 - (NSNumber *)propertyDecimalValue;
 
-/** Creation of a multi-value property */
-+ (CMISPropertyData *)createPropertyForId:(NSString *)id withArrayValue:(NSArray *)value type:(CMISPropertyType)type;
+/** Creation of a multi-value property 
+ */
++ (CMISPropertyData *)createPropertyForId:(NSString *)id arrayValue:(NSArray *)value type:(CMISPropertyType)type;
 
-/** Creation of a string property */
-+ (CMISPropertyData *)createPropertyForId:(NSString *)id withStringValue:(NSString *)value;
+/** Creation of a string property 
+ */
++ (CMISPropertyData *)createPropertyForId:(NSString *)id stringValue:(NSString *)value;
 
-/** Creation of an integer property */
-+ (CMISPropertyData *)createPropertyForId:(NSString *)id withIntegerValue:(NSInteger)value;
+/** Creation of an integer property 
+ */
++ (CMISPropertyData *)createPropertyForId:(NSString *)id integerValue:(NSInteger)value;
 
-/** Creation of a decimal property */
-+ (CMISPropertyData *)createPropertyForId:(NSString *)id withDecimalValue:(NSNumber *)value;
+/** Creation of a decimal property 
+ */
++ (CMISPropertyData *)createPropertyForId:(NSString *)id decimalValue:(NSNumber *)value;
 
-/** Creation of an id property */
-+ (CMISPropertyData *)createPropertyForId:(NSString *)id withIdValue:(NSString *)value;
+/** Creation of an id property 
+ */
++ (CMISPropertyData *)createPropertyForId:(NSString *)id idValue:(NSString *)value;
 
-/** Creation of a datetime property */
-+ (CMISPropertyData *)createPropertyForId:(NSString *)id withDateTimeValue:(NSDate *)value;
+/** Creation of a datetime property 
+ */
++ (CMISPropertyData *)createPropertyForId:(NSString *)id dateTimeValue:(NSDate *)value;
 
-/** Creation of a boolean property */
-+ (CMISPropertyData *)createPropertyForId:(NSString *)id withBoolValue:(BOOL)value;
+/** Creation of a boolean property 
+ */
++ (CMISPropertyData *)createPropertyForId:(NSString *)id boolValue:(BOOL)value;
 
-/** Creation of a uri property */
-+ (CMISPropertyData *)createPropertyForId:(NSString *)id withUriValue:(NSURL *)value;
+/** Creation of a uri property 
+ */
++ (CMISPropertyData *)createPropertyForId:(NSString *)id uriValue:(NSURL *)value;
 
-/** Creation of a uri property */
-+ (CMISPropertyData *)createPropertyForId:(NSString *)id withHtmlValue:(NSString *)value;
+/** Creation of a uri property 
+ */
++ (CMISPropertyData *)createPropertyForId:(NSString *)id htmlValue:(NSString *)value;
 
 @end

@@ -22,31 +22,38 @@
 
 @class CMISFolder;
 @class CMISObjectList;
+@class CMISRequest;
 
 @protocol CMISNavigationService <NSObject>
 
-/*
+/**
  * Retrieves the children for the given object identifier.
+ * completionBlock returns object list or nil if unsuccessful
  */
-- (void)retrieveChildren:(NSString *)objectId orderBy:(NSString *)orderBy
-                  filter:(NSString *)filter includeRelationShips:(CMISIncludeRelationship)includeRelationship
-         renditionFilter:(NSString *)renditionFilter includeAllowableActions:(BOOL)includeAllowableActions
-      includePathSegment:(BOOL)includePathSegment skipCount:(NSNumber *)skipCount
+- (CMISRequest*)retrieveChildren:(NSString *)objectId
+                 orderBy:(NSString *)orderBy
+                  filter:(NSString *)filter
+           relationships:(CMISIncludeRelationship)relationships
+         renditionFilter:(NSString *)renditionFilter
+ includeAllowableActions:(BOOL)includeAllowableActions
+      includePathSegment:(BOOL)includePathSegment
+               skipCount:(NSNumber *)skipCount
                 maxItems:(NSNumber *)maxItems
          completionBlock:(void (^)(CMISObjectList *objectList, NSError *error))completionBlock;
 
 /**
-* Retrieves the parent of a given object.
-* Returns a list of CMISObjectData objects
-*
-* TODO: OpenCMIS returns an ObjectParentData object .... is this necessary?
-*/
-- (void)retrieveParentsForObject:(NSString *)objectId
-                      withFilter:(NSString *)filter
-        withIncludeRelationships:(CMISIncludeRelationship)includeRelationship
-             withRenditionFilter:(NSString *)renditionFilter
-     withIncludeAllowableActions:(BOOL)includeAllowableActions
-  withIncludeRelativePathSegment:(BOOL)includeRelativePathSegment
+ * Retrieves the parent of a given object.
+ * Returns a list of CMISObjectData objects
+ *
+ * TODO: OpenCMIS returns an ObjectParentData object .... is this necessary?
+ * completionBlock returns array of parents or nil if unsuccessful
+ */
+- (CMISRequest*)retrieveParentsForObject:(NSString *)objectId
+                          filter:(NSString *)filter
+                   relationships:(CMISIncludeRelationship)relationships
+                 renditionFilter:(NSString *)renditionFilter
+         includeAllowableActions:(BOOL)includeAllowableActions
+      includeRelativePathSegment:(BOOL)includeRelativePathSegment
                  completionBlock:(void (^)(NSArray *parents, NSError *error))completionBlock;
 
 

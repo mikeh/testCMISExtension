@@ -41,12 +41,22 @@
 
 
 - (void)invoke:(NSURL *)url
-withHttpMethod:(CMISHttpRequestMethod)httpRequestMethod
-   withSession:(CMISBindingSession *)session
+    httpMethod:(CMISHttpRequestMethod)httpRequestMethod
+       session:(CMISBindingSession *)session
           body:(NSData *)body
        headers:(NSDictionary *)additionalHeaders
+   cmisRequest:(CMISRequest *)cmisRequest
 completionBlock:(void (^)(CMISHttpResponse *httpResponse, NSError *error))completionBlock
 {
+    if (cmisRequest.isCancelled)
+    {
+        if (completionBlock)
+        {
+            NSError *error = [CMISErrors createCMISErrorWithCode:kCMISErrorCodeCancelled detailedDescription:@"Request was cancelled"];
+            completionBlock(nil, error);
+        }
+        return;
+    }
     CustomGDCMISHttpRequest *request = [[CustomGDCMISHttpRequest alloc] init];
     BOOL success = [request prepareConnectionWithURL:url
                                                     session:session
@@ -62,20 +72,33 @@ completionBlock:(void (^)(CMISHttpResponse *httpResponse, NSError *error))comple
     if(!success && completionBlock)
     {
         NSString *detailedDescription = [NSString stringWithFormat:@"Could not create connection to %@", [url absoluteString]];
-        NSError *cmisError = [CMISErrors createCMISErrorWithCode:kCMISErrorCodeConnection withDetailedDescription:detailedDescription];
+        NSError *cmisError = [CMISErrors createCMISErrorWithCode:kCMISErrorCodeConnection detailedDescription:detailedDescription];
         completionBlock(nil, cmisError);
     }
+    else
+        cmisRequest.httpRequest = request;
+    
 }
 
 /*
  */
 - (void)invoke:(NSURL *)url
-withHttpMethod:(CMISHttpRequestMethod)httpRequestMethod
-   withSession:(CMISBindingSession *)session
+    httpMethod:(CMISHttpRequestMethod)httpRequestMethod
+       session:(CMISBindingSession *)session
    inputStream:(NSInputStream *)inputStream
        headers:(NSDictionary *)additionalHeaders
+   cmisRequest:(CMISRequest *)cmisRequest
 completionBlock:(void (^)(CMISHttpResponse *httpResponse, NSError *error))completionBlock
 {
+    if (cmisRequest.isCancelled)
+    {
+        if (completionBlock)
+        {
+            NSError *error = [CMISErrors createCMISErrorWithCode:kCMISErrorCodeCancelled detailedDescription:@"Request was cancelled"];
+            completionBlock(nil, error);
+        }
+        return;
+    }
     CustomGDCMISHttpRequest *request = [[CustomGDCMISHttpRequest alloc] init];
     BOOL success = [request prepareConnectionWithURL:url
                                                     session:session
@@ -90,9 +113,11 @@ completionBlock:(void (^)(CMISHttpResponse *httpResponse, NSError *error))comple
     if(!success && completionBlock)
     {
         NSString *detailedDescription = [NSString stringWithFormat:@"Could not create connection to %@", [url absoluteString]];
-        NSError *cmisError = [CMISErrors createCMISErrorWithCode:kCMISErrorCodeConnection withDetailedDescription:detailedDescription];
+        NSError *cmisError = [CMISErrors createCMISErrorWithCode:kCMISErrorCodeConnection detailedDescription:detailedDescription];
         completionBlock(nil, cmisError);
     }
+    else
+        cmisRequest.httpRequest = request;
 }
 
 /*
@@ -211,14 +236,14 @@ completionBlock:(void (^)(CMISHttpResponse *, NSError *))completionBlock
 */
 
 - (void)invoke:(NSURL *)url
-withHttpMethod:(CMISHttpRequestMethod)httpRequestMethod
-   withSession:(CMISBindingSession *)session
+    httpMethod:(CMISHttpRequestMethod)httpRequestMethod
+       session:(CMISBindingSession *)session
    inputStream:(NSInputStream *)inputStream
        headers:(NSDictionary *)additionalHeaders
  bytesExpected:(unsigned long long)bytesExpected
+   cmisRequest:(CMISRequest *)cmisRequest
 completionBlock:(void (^)(CMISHttpResponse *httpResponse, NSError *error))completionBlock
  progressBlock:(void (^)(unsigned long long bytesDownloaded, unsigned long long bytesTotal))progressBlock
- requestObject:(CMISRequest *)requestObject
 {
     /*
     NSString *urlString = [url absoluteString];
@@ -252,6 +277,15 @@ completionBlock:(void (^)(CMISHttpResponse *httpResponse, NSError *error))comple
                             progressBlock:progressBlock];
     
      */
+    if (cmisRequest.isCancelled)
+    {
+        if (completionBlock)
+        {
+            NSError *error = [CMISErrors createCMISErrorWithCode:kCMISErrorCodeCancelled detailedDescription:@"Request was cancelled"];
+            completionBlock(nil, error);
+        }
+        return;
+    }
     CustomGDCMISHttpRequest *request = [[CustomGDCMISHttpRequest alloc] init];
     BOOL success = [request prepareConnectionWithURL:url
                                                     session:session
@@ -266,24 +300,33 @@ completionBlock:(void (^)(CMISHttpResponse *httpResponse, NSError *error))comple
     if(!success && completionBlock)
     {
         NSString *detailedDescription = [NSString stringWithFormat:@"Could not create connection to %@", [url absoluteString]];
-        NSError *cmisError = [CMISErrors createCMISErrorWithCode:kCMISErrorCodeConnection withDetailedDescription:detailedDescription];
+        NSError *cmisError = [CMISErrors createCMISErrorWithCode:kCMISErrorCodeConnection detailedDescription:detailedDescription];
         completionBlock(nil, cmisError);
     }
     else
     {
-        requestObject.httpRequest = request;
+        cmisRequest.httpRequest = request;
     }
 }
 
 - (void)invoke:(NSURL *)url
-withHttpMethod:(CMISHttpRequestMethod)httpRequestMethod
-   withSession:(CMISBindingSession *)session
+    httpMethod:(CMISHttpRequestMethod)httpRequestMethod
+       session:(CMISBindingSession *)session
   outputStream:(NSOutputStream *)outputStream
  bytesExpected:(unsigned long long)bytesExpected
+   cmisRequest:(CMISRequest *)cmisRequest
 completionBlock:(void (^)(CMISHttpResponse *httpResponse, NSError *error))completionBlock
  progressBlock:(void (^)(unsigned long long bytesDownloaded, unsigned long long bytesTotal))progressBlock
- requestObject:(CMISRequest*)requestObject
 {
+    if (cmisRequest.isCancelled)
+    {
+        if (completionBlock)
+        {
+            NSError *error = [CMISErrors createCMISErrorWithCode:kCMISErrorCodeCancelled detailedDescription:@"Request was cancelled"];
+            completionBlock(nil, error);
+        }
+        return;
+    }
     CustomGDCMISHttpRequest *request = [[CustomGDCMISHttpRequest alloc] init];
     BOOL success = [request prepareConnectionWithURL:url
                                                     session:session
@@ -298,64 +341,72 @@ completionBlock:(void (^)(CMISHttpResponse *httpResponse, NSError *error))comple
     if(!success && completionBlock)
     {
         NSString *detailedDescription = [NSString stringWithFormat:@"Could not create connection to %@", [url absoluteString]];
-        NSError *cmisError = [CMISErrors createCMISErrorWithCode:kCMISErrorCodeConnection withDetailedDescription:detailedDescription];
+        NSError *cmisError = [CMISErrors createCMISErrorWithCode:kCMISErrorCodeConnection detailedDescription:detailedDescription];
         completionBlock(nil, cmisError);
     }
     else
     {
-        requestObject.httpRequest = request;
+        cmisRequest.httpRequest = request;
     }
 }
 
 - (void)invokeGET:(NSURL *)url
-      withSession:(CMISBindingSession *)session
+          session:(CMISBindingSession *)session
+      cmisRequest:(CMISRequest *)cmisRequest
   completionBlock:(void (^)(CMISHttpResponse *httpResponse, NSError *error))completionBlock
 {
     return [self invoke:url
-         withHttpMethod:HTTP_GET
-            withSession:session
+             httpMethod:HTTP_GET
+                session:session
                    body:nil
                 headers:nil
+            cmisRequest:cmisRequest
         completionBlock:completionBlock];
 }
 
 - (void)invokePOST:(NSURL *)url
-       withSession:(CMISBindingSession *)session
+           session:(CMISBindingSession *)session
               body:(NSData *)body
            headers:(NSDictionary *)additionalHeaders
+       cmisRequest:(CMISRequest *)cmisRequest
    completionBlock:(void (^)(CMISHttpResponse *httpResponse, NSError *error))completionBlock
 {
     return [self invoke:url
-         withHttpMethod:HTTP_POST
-            withSession:session
+             httpMethod:HTTP_POST
+                session:session
                    body:body
                 headers:additionalHeaders
+            cmisRequest:cmisRequest
         completionBlock:completionBlock];
 }
 
 - (void)invokePUT:(NSURL *)url
-      withSession:(CMISBindingSession *)session
+          session:(CMISBindingSession *)session
              body:(NSData *)body
           headers:(NSDictionary *)additionalHeaders
+      cmisRequest:(CMISRequest *)cmisRequest
   completionBlock:(void (^)(CMISHttpResponse *httpResponse, NSError *error))completionBlock
 {
     return [self invoke:url
-         withHttpMethod:HTTP_PUT
-            withSession:session
+             httpMethod:HTTP_PUT
+                session:session
                    body:body
                 headers:additionalHeaders
+            cmisRequest:cmisRequest
         completionBlock:completionBlock];
 }
 
 - (void)invokeDELETE:(NSURL *)url
-         withSession:(CMISBindingSession *)session
+             session:(CMISBindingSession *)session
+         cmisRequest:(CMISRequest *)cmisRequest
      completionBlock:(void (^)(CMISHttpResponse *httpResponse, NSError *error))completionBlock
 {
     return [self invoke:url
-         withHttpMethod:HTTP_DELETE
-            withSession:session
+             httpMethod:HTTP_DELETE
+                session:session
                    body:nil
                 headers:nil
+            cmisRequest:cmisRequest
         completionBlock:completionBlock];
 }
 

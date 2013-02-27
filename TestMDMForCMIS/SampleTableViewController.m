@@ -273,8 +273,8 @@ static NSString * kTMPDIRNAME = @"/tmp";
             unsigned long long bytesExpected = myStat.fileLen;
             NSLog(@"the expected file length to be uploaded is %lld",myStat.fileLen);
             [self.rootFolder createDocumentFromInputStream:inputStream
-                                              withMimeType:kTEXTMIMETYPE
-                                            withProperties:documentProperties
+                                                  mimeType:kTEXTMIMETYPE
+                                                properties:documentProperties
                                              bytesExpected:bytesExpected
                                            completionBlock:^(NSString *objectId, NSError *error){
                                                if (nil == objectId)
@@ -372,8 +372,8 @@ static NSString * kTMPDIRNAME = @"/tmp";
             unsigned long long bytesExpected = myStat.fileLen;
             NSLog(@"the expected file length to be uploaded is %lld",myStat.fileLen);
             [self.rootFolder createDocumentFromInputStream:inputStream
-                                              withMimeType:kPDFMIMETYPE
-                                            withProperties:documentProperties
+                                                  mimeType:kPDFMIMETYPE
+                                                properties:documentProperties
                                              bytesExpected:bytesExpected
                                            completionBlock:^(NSString *objectId, NSError *error){
                                                if (nil == objectId)

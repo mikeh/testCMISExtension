@@ -27,11 +27,17 @@
 @property (nonatomic, strong) NSString *filter;
 @property BOOL includeAllowableActions;
 @property BOOL includePolicyIds;
-@property CMISIncludeRelationship includeRelationships;
+@property CMISIncludeRelationship relationships;
 @property BOOL includeACL;
 @property (nonatomic, strong) NSString *renditionFilter;
 
+/**
+ * init the template URL with URL string
+ */
 - (id)initWithTemplateUrl:(NSString *)templateUrl;
+/**
+ * return the full URL
+ */
 - (NSURL *)buildUrl;
 
 @end

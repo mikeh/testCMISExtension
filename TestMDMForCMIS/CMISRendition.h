@@ -23,22 +23,41 @@
 @class CMISDocument;
 @class CMISOperationContext;
 @class CMISSession;
-
+@class CMISRequest;
 
 @interface CMISRendition : CMISRenditionData
 
-- (id)initWithRenditionData:(CMISRenditionData *)renditionData andObjectId:(NSString *)objectId andSession:(CMISSession *)session;
+/**
+ initialiser
+ */
+- (id)initWithRenditionData:(CMISRenditionData *)renditionData objectId:(NSString *)objectId session:(CMISSession *)session;
 
-- (void)retrieveRenditionDocumentWithCompletionBlock:(void (^)(CMISDocument *document, NSError *error))completionBlock;
+/**
+ * retrieves the rendition, e.g. thumbnail of a document
+ * completionBlock returns the rendition object as CMIS document or nil if unsuccessful
+ */
+- (CMISRequest*)retrieveRenditionDocumentWithCompletionBlock:(void (^)(CMISDocument *document, NSError *error))completionBlock;
 
-- (void)retrieveRenditionDocumentWithOperationContext:(CMISOperationContext *)operationContext
+/**
+ * retrieves the rendition, e.g. thumbnail of a document
+ * completionBlock returns the rendition object as CMIS document or nil if unsuccessful
+ */
+- (CMISRequest*)retrieveRenditionDocumentWithOperationContext:(CMISOperationContext *)operationContext
                                       completionBlock:(void (^)(CMISDocument *document, NSError *error))completionBlock;
 
-- (void)downloadRenditionContentToFile:(NSString *)filePath
+/**
+ * downloads the rendition of a document e.g. thumbnail of a document to a file
+ * completionBlock returns the rendition object as CMIS document or nil if unsuccessful
+ */
+- (CMISRequest*)downloadRenditionContentToFile:(NSString *)filePath
                        completionBlock:(void (^)(NSError *error))completionBlock
                          progressBlock:(void (^)(unsigned long long bytesDownloaded, unsigned long long bytesTotal))progressBlock;
 
-- (void)downloadRenditionContentToOutputStream:(NSOutputStream *)outputStream
+/**
+ * downloads the rendition of a document e.g. thumbnail of a document to a file
+ * completionBlock returns the rendition object as CMIS document or nil if unsuccessful
+ */
+- (CMISRequest*)downloadRenditionContentToOutputStream:(NSOutputStream *)outputStream
                                completionBlock:(void (^)(NSError *error))completionBlock
                                  progressBlock:(void (^)(unsigned long long bytesDownloaded, unsigned long long bytesTotal))progressBlock;
 

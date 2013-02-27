@@ -25,12 +25,15 @@
 
 @property (nonatomic, strong) NSString *statement;
 @property BOOL searchAllVersions;
-@property CMISIncludeRelationship includeRelationships;
+@property CMISIncludeRelationship relationships;
 @property (nonatomic, strong) NSString *renditionFilter;
 @property BOOL includeAllowableActions;
 @property (nonatomic, strong) NSNumber * skipCount;
 @property (nonatomic, strong) NSNumber * maxItems;
 
+/**
+ @return the XML query as string
+ */
 - (NSString *)generateAtomEntryXML;
 
 @end

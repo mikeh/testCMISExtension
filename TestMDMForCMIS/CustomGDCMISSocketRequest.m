@@ -12,16 +12,16 @@
 #import "CMISConstants.h"
 #import "CMISDateUtil.h"
 
-NSUInteger BUFFERSIZE = 524280;//must be integer-divisible by 3
-NSString * HTTPSPACE = @" ";
-NSString * HTTPCRLF = @"\r\n";
-NSString * HTTPPROTOCOL = @"HTTP/1.1";
-NSString * HTTPHOST = @"Host: ";
-NSString * HTTPCODING = @"Transfer-Encoding: chunked";
-NSString * HTTPCONTENTLENGTH = @"Content-Length: ";
-NSString * HTTPCONNECTION = @"Connection: keep-alive";
-NSString * HTTPBASE64 = @"Content-Encoding: base64";
-NSString * HTTPLASTCHUNK = @"0\r\n";
+NSUInteger kBUFFERSIZE = 524280;//must be integer-divisible by 3
+NSString * kHTTPSPACE = @" ";
+NSString * kHTTPCRLF = @"\r\n";
+NSString * kHTTPPROTOCOL = @"HTTP/1.1";
+NSString * kHTTPHOST = @"Host: ";
+NSString * kHTTPCODING = @"Transfer-Encoding: chunked";
+NSString * kHTTPCONTENTLENGTH = @"Content-Length: ";
+NSString * kHTTPCONNECTION = @"Connection: keep-alive";
+NSString * kHTTPBASE64 = @"Content-Encoding: base64";
+NSString * kHTTPLASTCHUNK = @"0\r\n";
 
 @interface CustomGDCMISSocketRequest ()
 {
@@ -156,8 +156,8 @@ NSString * HTTPLASTCHUNK = @"0\r\n";
         {
             @autoreleasepool
             {
-                uint8_t buffer[BUFFERSIZE];
-                NSInteger bytes = [self.inputStream read:buffer maxLength:BUFFERSIZE];
+                uint8_t buffer[kBUFFERSIZE];
+                NSInteger bytes = [self.inputStream read:buffer maxLength:kBUFFERSIZE];
                 if (0 < bytes)
                 {
                     NSData *chunkData = [NSData dataWithBytes:buffer length:bytes];
@@ -179,7 +179,7 @@ NSString * HTTPLASTCHUNK = @"0\r\n";
             NSUInteger diff = length - realLength;
             for (int i = 0; i < diff; ++i)
             {
-                [currentSocket.writeStream write:[HTTPSPACE UTF8String]];
+                [currentSocket.writeStream write:[kHTTPSPACE UTF8String]];
             }
         }
         [currentSocket write];
@@ -194,7 +194,7 @@ NSString * HTTPLASTCHUNK = @"0\r\n";
         {
             @autoreleasepool
             {
-                const NSUInteger bufferSize = BUFFERSIZE;
+                const NSUInteger bufferSize = kBUFFERSIZE;
                 uint8_t buffer[bufferSize];
                 NSInteger bytes = [self.inputStream read:buffer maxLength:bufferSize];
                 if (0 < bytes)
@@ -259,7 +259,7 @@ NSString * HTTPLASTCHUNK = @"0\r\n";
     }
     
     NSString *responseDataString = [[NSString alloc] initWithData:self.receivedData encoding:NSUTF8StringEncoding];
-    NSArray *crlfComponents = [responseDataString componentsSeparatedByString:HTTPCRLF];
+    NSArray *crlfComponents = [responseDataString componentsSeparatedByString:kHTTPCRLF];
     NSMutableData *cleanedData = [NSMutableData data];
     for (int i = 0 ; i < crlfComponents.count; ++i)
     {
@@ -288,7 +288,7 @@ NSString * HTTPLASTCHUNK = @"0\r\n";
     {
 //        NSLog(@"We get a error as HTTP status: %ld and message %@", statusCode_32, statusMessage);
         NSError * error = [CMISErrors createCMISErrorWithCode:kCMISErrorCodeFilterNotValid
-                                      withDetailedDescription:@"An error occurred on the socket"];
+                                      detailedDescription:@"An error occurred on the socket"];
         self.completionBlock(nil, error);
         
     }
@@ -301,7 +301,7 @@ NSString * HTTPLASTCHUNK = @"0\r\n";
 - (void)onErr:(int)errorCode inSocket:(CustomGDCMISSocketRequest *)currentSocket
 {
     NSError * error = [CMISErrors createCMISErrorWithCode:kCMISErrorCodeFilterNotValid
-                                  withDetailedDescription:[NSString stringWithFormat:@"GDSocket fired error with code %d",errorCode]];
+                                  detailedDescription:[NSString stringWithFormat:@"GDSocket fired error with code %d",errorCode]];
     self.completionBlock(nil, error);
     self.completionBlock = nil;    
 }
@@ -311,73 +311,73 @@ NSString * HTTPLASTCHUNK = @"0\r\n";
 - (NSString *)headerForRequest
 {
     NSMutableString *requestHeader = [NSMutableString stringWithString:self.requestMethod];
-    [requestHeader appendString:HTTPSPACE];
+    [requestHeader appendString:kHTTPSPACE];
     [requestHeader appendString:self.serviceApi];
-    [requestHeader appendString:HTTPSPACE];
-    [requestHeader appendString:HTTPPROTOCOL];
-    [requestHeader appendString:HTTPCRLF];
+    [requestHeader appendString:kHTTPSPACE];
+    [requestHeader appendString:kHTTPPROTOCOL];
+    [requestHeader appendString:kHTTPCRLF];
     
     if (self.authenticationHeader)
     {
         [self.authenticationHeader enumerateKeysAndObjectsUsingBlock:^(NSString *key, NSString *value, BOOL *stop){
             [requestHeader appendString:[NSString stringWithFormat:@"%@: %@", key, value]];
-            [requestHeader appendString:HTTPCRLF];
+            [requestHeader appendString:kHTTPCRLF];
         }];
     }
     if (self.headers)
     {
         [self.headers enumerateKeysAndObjectsUsingBlock:^(NSString *key, NSString *value, BOOL *stop){
             [requestHeader appendString:[NSString stringWithFormat:@"%@: %@", key, value]];
-            [requestHeader appendString:HTTPCRLF];
+            [requestHeader appendString:kHTTPCRLF];
         }];
     }
-    [requestHeader appendString:HTTPHOST];
+    [requestHeader appendString:kHTTPHOST];
     [requestHeader appendString:self.host];
-    [requestHeader appendString:HTTPCRLF];
+    [requestHeader appendString:kHTTPCRLF];
     
     [requestHeader appendString:@"Accept: */*"];
-    [requestHeader appendString:HTTPCRLF];
-    [requestHeader appendString:HTTPCODING];
-    [requestHeader appendString:HTTPCRLF];
-    [requestHeader appendString:HTTPCRLF];
+    [requestHeader appendString:kHTTPCRLF];
+    [requestHeader appendString:kHTTPCODING];
+    [requestHeader appendString:kHTTPCRLF];
+    [requestHeader appendString:kHTTPCRLF];
     return (NSString *)requestHeader;
 }
 
 - (NSString *)headerWithContentLength:(NSUInteger)lengthInBytes
 {
     NSMutableString *requestHeader = [NSMutableString stringWithString:self.requestMethod];
-    [requestHeader appendString:HTTPSPACE];
+    [requestHeader appendString:kHTTPSPACE];
     [requestHeader appendString:self.serviceApi];
-    [requestHeader appendString:HTTPSPACE];
-    [requestHeader appendString:HTTPPROTOCOL];
-    [requestHeader appendString:HTTPCRLF];
+    [requestHeader appendString:kHTTPSPACE];
+    [requestHeader appendString:kHTTPPROTOCOL];
+    [requestHeader appendString:kHTTPCRLF];
     
     if (self.authenticationHeader)
     {
         [self.authenticationHeader enumerateKeysAndObjectsUsingBlock:^(NSString *key, NSString *value, BOOL *stop){
             [requestHeader appendString:[NSString stringWithFormat:@"%@: %@", key, value]];
-            [requestHeader appendString:HTTPCRLF];
+            [requestHeader appendString:kHTTPCRLF];
         }];
     }
     if (self.headers)
     {
         [self.headers enumerateKeysAndObjectsUsingBlock:^(NSString *key, NSString *value, BOOL *stop){
             [requestHeader appendString:[NSString stringWithFormat:@"%@: %@", key, value]];
-            [requestHeader appendString:HTTPCRLF];
+            [requestHeader appendString:kHTTPCRLF];
         }];
     }
-    [requestHeader appendString:HTTPHOST];
+    [requestHeader appendString:kHTTPHOST];
     [requestHeader appendString:self.host];
-    [requestHeader appendString:HTTPCRLF];
+    [requestHeader appendString:kHTTPCRLF];
     
     [requestHeader appendString:@"Accept: */*"];
-    [requestHeader appendString:HTTPCRLF];
-    [requestHeader appendString:HTTPBASE64];
-    [requestHeader appendString:HTTPCRLF];
-    NSString *lengthString = [NSString stringWithFormat:@"%@%d", HTTPCONTENTLENGTH, lengthInBytes];
+    [requestHeader appendString:kHTTPCRLF];
+    [requestHeader appendString:kHTTPBASE64];
+    [requestHeader appendString:kHTTPCRLF];
+    NSString *lengthString = [NSString stringWithFormat:@"%@%d", kHTTPCONTENTLENGTH, lengthInBytes];
     [requestHeader appendString:lengthString];
-    [requestHeader appendString:HTTPCRLF];
-    [requestHeader appendString:HTTPCRLF];
+    [requestHeader appendString:kHTTPCRLF];
+    [requestHeader appendString:kHTTPCRLF];
     return (NSString *)requestHeader;
 }
 

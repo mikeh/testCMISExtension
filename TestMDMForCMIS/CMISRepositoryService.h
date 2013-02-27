@@ -21,19 +21,28 @@
 #import "CMISRepositoryInfo.h"
 
 @class CMISTypeDefinition;
+@class CMISRequest;
 
 @protocol CMISRepositoryService <NSObject>
 
 /**
-* Returns an array of CMISRepositoryInfo objects representing the repositories available at the endpoint.
-*/
-- (void)retrieveRepositoriesWithCompletionBlock:(void (^)(NSArray *repositories, NSError *error))completionBlock;
+ * Returns an array of CMISRepositoryInfo objects representing the repositories available at the endpoint.
+ * completionBlock returns array of repositories or nil if unsuccessful
+ */
+- (CMISRequest*)retrieveRepositoriesWithCompletionBlock:(void (^)(NSArray *repositories, NSError *error))completionBlock;
 
 /**
-* Returns the repository info for the repository with the given id
-*/
-- (void)retrieveRepositoryInfoForId:(NSString *)repositoryId completionBlock:(void (^)(CMISRepositoryInfo *repositoryInfo, NSError *error))completionBlock;
+ * Returns the repository info for the repository with the given id
+ * completionBlock returns repository or nil if unsuccessful
+ */
+- (CMISRequest*)retrieveRepositoryInfoForId:(NSString *)repositoryId
+                    completionBlock:(void (^)(CMISRepositoryInfo *repositoryInfo, NSError *error))completionBlock;
 
-- (void)retrieveTypeDefinition:(NSString *)typeId completionBlock:(void (^)(CMISTypeDefinition *typeDefinition, NSError *error))completionBlock;
+/**
+ * Returns the type definitions
+ * completionBlock returns type definition or nil if unsuccessful
+ */
+- (CMISRequest*)retrieveTypeDefinition:(NSString *)typeId
+               completionBlock:(void (^)(CMISTypeDefinition *typeDefinition, NSError *error))completionBlock;
 
 @end

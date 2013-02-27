@@ -21,6 +21,7 @@
 #import "CMISEnums.h"
 
 @class CMISObjectList;
+@class CMISRequest;
 
 @protocol CMISDiscoveryService <NSObject>
 
@@ -30,13 +31,15 @@
 (optional) Integer skipCount: This is the number of potential results that the repository MUST skip/page over
                               before returning any results. Defaults to 0.
 */
-// TODO: add all params which are required by spec
-- (void)query:(NSString *)statement searchAllVersions:(BOOL)searchAllVersions
-                                 includeRelationShips:(CMISIncludeRelationship)includeRelationships
-                                      renditionFilter:(NSString *)renditionFilter
-                              includeAllowableActions:(BOOL)includeAllowableActions
-                                             maxItems:(NSNumber *)maxItems
-                                            skipCount:(NSNumber *)skipCount
-                                      completionBlock:(void (^)(CMISObjectList *objectList, NSError *error))completionBlock;
+/** launches a query on the server with the parameters specified
+ * completionBlock returns the found object list or nil if unsuccessful
+ */
+- (CMISRequest*)query:(NSString *)statement searchAllVersions:(BOOL)searchAllVersions
+                                                relationships:(CMISIncludeRelationship)relationships
+                                              renditionFilter:(NSString *)renditionFilter
+                                      includeAllowableActions:(BOOL)includeAllowableActions
+                                                     maxItems:(NSNumber *)maxItems
+                                                    skipCount:(NSNumber *)skipCount
+                                              completionBlock:(void (^)(CMISObjectList *objectList, NSError *error))completionBlock;
 
 @end

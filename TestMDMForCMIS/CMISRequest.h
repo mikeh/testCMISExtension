@@ -20,12 +20,23 @@
 #import <Foundation/Foundation.h>
 
 @class CMISHttpRequest;
-
-@interface CMISRequest : NSObject
-
-@property (nonatomic, weak) id httpRequest;
-@property (nonatomic, readonly, getter = isCancelled) BOOL cancelled;
+@protocol CMISCancellableRequest <NSObject>
 
 - (void)cancel;
 
 @end
+
+@interface CMISRequest : NSObject
+
+@property (nonatomic, strong) id httpRequest;
+@property (nonatomic, readonly, getter = isCancelled) BOOL cancelled;
+
+/**
+ cancel a network request
+ */
+- (void)cancel;
+
+
+@end
+
+

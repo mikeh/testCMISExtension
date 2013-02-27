@@ -164,7 +164,7 @@
     {
         NSLog(@"We get a error as HTTP status: %d and message %@", statusCode, message);
         NSError * error = [CMISErrors createCMISErrorWithCode:kCMISErrorCodeFilterNotValid
-                                      withDetailedDescription:message];
+                                      detailedDescription:message];
         self.completionBlock(nil, error);
     }
     

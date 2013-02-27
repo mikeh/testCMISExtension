@@ -25,13 +25,18 @@
 @property (nonatomic, strong) NSString *statusCodeMessage;
 @property (nonatomic, strong, readonly) NSData *data;
 
-+ (CMISHttpResponse *)responseUsingURLHTTPResponse:(NSHTTPURLResponse *)HTTPURLResponse andData:(NSData *)data;
+/// wrapper for returned NSHTTPURLResponse and retrieved data
++ (CMISHttpResponse *)responseUsingURLHTTPResponse:(NSHTTPURLResponse *)HTTPURLResponse
+                                              data:(NSData *)data;
+
+/// returns a CMISHttpResponse object with HTTP status code, message headers and any response data
 + (CMISHttpResponse *)responseWithStatusCode:(int)statusCode
                                statusMessage:(NSString *)message
                                      headers:(NSDictionary *)headers
                                 responseData:(NSData *)data;
 
 - (NSString*)exception;
+
 - (NSString*)errorMessage;
 
 @end

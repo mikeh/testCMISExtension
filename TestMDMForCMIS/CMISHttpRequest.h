@@ -20,10 +20,10 @@
 #import <Foundation/Foundation.h>
 #import "CMISBindingSession.h"
 #import "CMISNetworkProvider.h"
-
+#import "CMISRequest.h"
 @class CMISAuthenticationProvider;
 
-@interface CMISHttpRequest : NSObject <NSURLConnectionDataDelegate>
+@interface CMISHttpRequest : NSObject <NSURLConnectionDataDelegate, CMISCancellableRequest>
 
 @property (nonatomic, assign) CMISHttpRequestMethod requestMethod;
 @property (nonatomic, strong) NSURLConnection *connection;
@@ -34,18 +34,27 @@
 @property (nonatomic, strong) id<CMISAuthenticationProvider> authenticationProvider;
 @property (nonatomic, copy) void (^completionBlock)(CMISHttpResponse *httpResponse, NSError *error);
 
-+ (CMISHttpRequest*)startRequest:(NSMutableURLRequest *)urlRequest
-              withHttpMethod:(CMISHttpRequestMethod)httpRequestMethod
-                 requestBody:(NSData*)requestBody
-                     headers:(NSDictionary*)additionalHeaders
-      authenticationProvider:(id<CMISAuthenticationProvider>)authenticationProvider
-             completionBlock:(void (^)(CMISHttpResponse *httpResponse, NSError *error))completionBlock;
+/**
+ * starts a URL request for given HTTP method 
+ * @param requestBody (optional)
+ * @param additionalHeaders (optional)
+ * @param authenticationProvider (required)
+ * completionBlock returns a CMISHTTPResponse object or nil if unsuccessful
+ */
++ (id)startRequest:(NSMutableURLRequest *)urlRequest
+                      httpMethod:(CMISHttpRequestMethod)httpRequestMethod
+                     requestBody:(NSData*)requestBody
+                         headers:(NSDictionary*)additionalHeaders
+          authenticationProvider:(id<CMISAuthenticationProvider>)authenticationProvider
+                 completionBlock:(void (^)(CMISHttpResponse *httpResponse, NSError *error))completionBlock;
 
+/**
+ * initialises with a specified HTTP method
+ */
 - (id)initWithHttpMethod:(CMISHttpRequestMethod)httpRequestMethod
          completionBlock:(void (^)(CMISHttpResponse *httpResponse, NSError *error))completionBlock;
 
+/// starts the URL request
 - (BOOL)startRequest:(NSMutableURLRequest*)urlRequest;
-
-- (void)cancel;
 
 @end
