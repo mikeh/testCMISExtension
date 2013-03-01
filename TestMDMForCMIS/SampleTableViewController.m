@@ -354,6 +354,7 @@ static NSString * kTMPDIRNAME = @"/tmp";
     }
     NSLog(@"We are in uploadBigFile");
     NSString *filePath = [self prepareBigTestFileForUpload];
+    
     if (filePath && self.rootFolder)
     {
         NSURL *fileURL = [NSURL URLWithString:filePath];
@@ -706,7 +707,7 @@ static NSString * kTMPDIRNAME = @"/tmp";
     NSDateFormatter *formatter = [[NSDateFormatter alloc] init];
     [formatter setDateFormat: @"yyyy-MM-dd'T'HH-mm-ss-Z'"];
     NSString *documentName = [NSString stringWithFormat:@"cmis-spec_%@.pdf", [formatter stringFromDate:[NSDate date]]];
-    
+    NSUInteger bytesWritten = 0;
     if (content && 0 < [content length])
     {
         NSError *error = nil;
@@ -718,8 +719,10 @@ static NSString * kTMPDIRNAME = @"/tmp";
                 NSUInteger bufferSize = [content length];
                 uint8_t buffer[bufferSize];
                 [content getBytes:buffer length:bufferSize];
-                if ([writeStream write:(const uint8_t *)(&buffer) maxLength:bufferSize] != -1 )
+                NSInteger bytesRead = [writeStream write:(const uint8_t *)(&buffer) maxLength:bufferSize];
+                if (bytesRead != -1 )
                 {
+                    bytesWritten += bytesRead;
                     NSLog(@"Managed to write content of file into secure container");
                 }
                 else
@@ -734,8 +737,15 @@ static NSString * kTMPDIRNAME = @"/tmp";
     {
         NSLog(@"We were not able to create a valid GDCWriteStream instance for file %@", documentName);
     }
+    NSLog(@"*** prepareBigTestFileForUpload: bytes written %d", bytesWritten);
     
     [fileHandle closeFile];
+    NSError *error = nil;
+    NSData *testData = [GDFileSystem readFromFile:documentName error:&error];
+    if (testData)
+    {
+        NSLog(@"the number of bytes returned is %d",testData.length);
+    }
     return documentName;
     
 }
@@ -750,7 +760,7 @@ static NSString * kTMPDIRNAME = @"/tmp";
     NSDateFormatter *formatter = [[NSDateFormatter alloc] init];
     [formatter setDateFormat: @"yyyy-MM-dd'T'HH-mm-ss-Z'"];
     NSString *documentName = [NSString stringWithFormat:@"test_file_%@.txt", [formatter stringFromDate:[NSDate date]]];
-    
+    NSUInteger bytesWritten = 0;
     if (content && 0 < [content length])
     {
         NSError *error = nil;
@@ -762,8 +772,10 @@ static NSString * kTMPDIRNAME = @"/tmp";
                 NSUInteger bufferSize = [content length];
                 uint8_t buffer[bufferSize];
                 [content getBytes:buffer length:bufferSize];
-                if ([writeStream write:(const uint8_t *)(&buffer) maxLength:bufferSize] != -1 )
+                NSInteger bytesRead = [writeStream write:(const uint8_t *)(&buffer) maxLength:bufferSize];
+                if ( bytesRead != -1 )
                 {
+                    bytesWritten += bytesRead;
                     NSLog(@"Managed to write content of file into secure container");
                 }
                 else
@@ -778,8 +790,15 @@ static NSString * kTMPDIRNAME = @"/tmp";
     {
         NSLog(@"We were not able to create a valid GDCWriteStream instance for file %@", documentName);
     }
+    NSLog(@"*** prepareTestFileForUpload: bytes written %d", bytesWritten);
     
     [fileHandle closeFile];
+    NSError *error = nil;
+    NSData *testData = [GDFileSystem readFromFile:documentName error:&error];
+    if (testData)
+    {
+        NSLog(@"the number of bytes returned is %d",testData.length);
+    }
     return documentName;
 }
 
