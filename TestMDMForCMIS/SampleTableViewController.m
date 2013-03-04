@@ -171,9 +171,10 @@ static NSString * kTMPDIRNAME = @"/tmp";
      To do this use
      [GDURLLoadingSystem enableSecureCommunication];
      AFTER GD has been successfully authenticated (typically a method in the AppDelegate)
-     */
     CustomGDCMISNetworkProvider *networkProvider = [[CustomGDCMISNetworkProvider alloc] init];
     parameters.networkProvider = networkProvider;
+     */
+    [GDURLLoadingSystem enableSecureCommunication];
     
     [CMISSession connectWithSessionParameters:parameters completionBlock:^(CMISSession *session, NSError *error){
         if (nil == session)
